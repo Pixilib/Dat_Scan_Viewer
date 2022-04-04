@@ -1,6 +1,7 @@
 import { RenderingEngine, Enums, init, } from '@cornerstonejs/core';
 import React, { Component } from 'react';
 
+//Si il y a une erreur avec le init, commenter le si il ne l'est pas ou décommenter le si il l'est puis enregister
 init()
 
 export default () => {
