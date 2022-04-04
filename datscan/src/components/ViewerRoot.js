@@ -1,21 +1,23 @@
-import { RenderingEngine } from "@cornerstonejs/core";
-import ViewportType from "@cornerstonejs/core";
+import { RenderingEngine, Enums, init, } from '@cornerstonejs/core';
+import React, { Component } from 'react';
+
+init()
 
 export default () => {
 
-    const divAff = document.createElement('div');
+    // const divAff = React.createElement('div', {})
+    const divAff = document.createElement('div')
     const imageId = 'wadouri:/images/MR000000.dcm'
 
-    // const renderingEngineId = 'myEngine';
-    const renderingEngine = new RenderingEngine('myEngine')
-    renderingEngine.init();
+    const renderingEngineId = 'myEngine';
+    const renderingEngine = new RenderingEngine(renderingEngineId)
 
 
-    const viewportIdentifiant = 'IMAGES_STACK'
+    const viewportIdentifiant = 'CT_AXIAL_STACK'
     const viewportInput = {
         viewportId: viewportIdentifiant,
         element: divAff,
-        type: ViewportType.STACK,
+        type: Enums.ViewportType.STACK,
     };
 
     renderingEngine.enableElement(viewportInput);
@@ -28,6 +30,7 @@ export default () => {
 
     return (
         <>
+            <div className='content'></div>
         </>
     )
 

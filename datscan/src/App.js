@@ -5,8 +5,8 @@ function App() {
   return (
     <div className="App">
       <header className="App-head">
+        <div className='content'></div>
         <ViewerRoot></ViewerRoot>
-        <p>test</p>
       </header>
     </div>
   );
