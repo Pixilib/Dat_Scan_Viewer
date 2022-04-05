@@ -1,24 +1,25 @@
 import * as cornerstone from '@cornerstonejs/core';
 import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import initCornerstoneWADOImageLoader from './initCornerstoneWADOImageLoader'
-import React, { Component, useEffect } from 'react';
-
+import React, { Component, useEffect, useState } from 'react';
+import Basic from './DropZone';
 
 export default () => {
+
+    const [file, setfile] = useState(0);
 
     useEffect(() => {
         const run = async () => {
             //Configuration et initialisation des libraries
-            await cornerstone.init()
-            initCornerstoneWADOImageLoader()
 
+            await cornerstone.init();
+            initCornerstoneWADOImageLoader();
 
-            const divAff = document.getElementById("viewer")
+            const divAff = document.getElementById("viewer");
             divAff.style.width = "500px"
             divAff.style.height = "500px"
 
-            // this UI is only built for a single file so just dump the first one
-            const fic = new File([''], './images/MR000000.dcm')
+            const fic = file;
             const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(fic);
 
             const renderingEngineId = 'myEngine';
@@ -37,19 +38,17 @@ export default () => {
             const viewport = renderingEngine.getViewport(viewportIdentifiant);
 
             const stack = [imageId]
-            // const stack = cornerstone.imageLoader.loadAndCacheImage(imageId);
-            console.log(stack)
-
             viewport.setStack(stack)
 
             viewport.render()
         }
         run()
-    }, [])
+    }, [file])
 
 
     return (
         <>
+            <Basic count={file} set={setfile}></Basic>
             <div id="viewer"></div>
         </>
     )
