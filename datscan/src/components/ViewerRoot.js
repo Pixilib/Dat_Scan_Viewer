@@ -1,37 +1,56 @@
-import { RenderingEngine, Enums, init, } from '@cornerstonejs/core';
-import React, { Component } from 'react';
+import * as cornerstone from '@cornerstonejs/core';
+import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
+import initCornerstoneWADOImageLoader from './initCornerstoneWADOImageLoader'
+import React, { Component, useEffect } from 'react';
 
-//Si il y a une erreur avec le init, commenter le si il ne l'est pas ou décommenter le si il l'est puis enregister
-init()
 
 export default () => {
 
-    // const divAff = React.createElement('div', {})
-    const divAff = document.createElement('div')
-    const imageId = 'wadouri:/images/MR000000.dcm'
+    useEffect(() => {
+        const run = async () => {
+            //Configuration et initialisation des libraries
+            await cornerstone.init()
+            initCornerstoneWADOImageLoader()
 
-    const renderingEngineId = 'myEngine';
-    const renderingEngine = new RenderingEngine(renderingEngineId)
+
+            const divAff = document.getElementById("viewer")
+            divAff.style.width = "500px"
+            divAff.style.height = "500px"
+
+            // this UI is only built for a single file so just dump the first one
+            const fic = new File([''], './images/MR000000.dcm')
+            const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(fic);
+
+            const renderingEngineId = 'myEngine';
+            const renderingEngine = new cornerstone.RenderingEngine(renderingEngineId)
 
 
-    const viewportIdentifiant = 'CT_AXIAL_STACK'
-    const viewportInput = {
-        viewportId: viewportIdentifiant,
-        element: divAff,
-        type: Enums.ViewportType.STACK,
-    };
+            const viewportIdentifiant = 'CT_STACK'
+            const viewportInput = {
+                viewportId: viewportIdentifiant,
+                element: divAff,
+                type: cornerstone.Enums.ViewportType.STACK,
+            };
 
-    renderingEngine.enableElement(viewportInput);
+            renderingEngine.enableElement(viewportInput);
 
-    const viewport = renderingEngine.getViewport(viewportIdentifiant);
+            const viewport = renderingEngine.getViewport(viewportIdentifiant);
 
-    viewport.setStack(imageId, 60);
+            const stack = [imageId]
+            // const stack = cornerstone.imageLoader.loadAndCacheImage(imageId);
+            console.log(stack)
 
-    viewport.render()
+            viewport.setStack(stack)
+
+            viewport.render()
+        }
+        run()
+    }, [])
+
 
     return (
         <>
-            <div className='content'></div>
+            <div id="viewer"></div>
         </>
     )
 
