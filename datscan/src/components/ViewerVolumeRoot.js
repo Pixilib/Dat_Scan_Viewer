@@ -47,12 +47,14 @@ export default () => {
             //Recuperation du viewport initialisé
             const viewport = renderingEngine.getViewport(viewportIdentifiant)
 
+            console.log(volumeId)
+
             //Definition du volume
-            const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId, { imageIdDefault });
+            const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId, { imageId });
 
             volume.load();
 
-            volume.setVolumes([
+            viewport.setVolumes([
                 { volumeId, callback: setCtTransferFunctionForVolumeActor },
             ]);
 
