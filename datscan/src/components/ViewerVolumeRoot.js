@@ -4,6 +4,10 @@ import initCornerstoneWADOImageLoader from './initCornerstoneWADOImageLoader'
 import React, { Component, useEffect, useState } from 'react';
 import Drop from './DropZone';
 import setCtTransferFunctionForVolumeActor from './setCtTransferFunctionForVolumeActor';
+import {
+    cornerstoneStreamingImageVolumeLoader,
+    sharedArrayBufferImageLoader,
+} from '@cornerstonejs/streaming-image-volume-loader';
 
 export default () => {
     const [file, setfile] = useState(0);
@@ -11,9 +15,16 @@ export default () => {
     const viewportIdentifiant = 'CT_STACK'
     const [count, setCount] = useState(0);
 
-    const volumeId = 'cornerStreamingImageVolume: myVolume';
-
     let imageIdDefault = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
+    // const volumeName = 'CT_VOLUME_ID'; // Id of the volume less loader prefix
+    // const volumeLoaderScheme = 'cornerstoneStreamingImageVolume'; // Loader id which defines which volume loader to use
+    // const volumeId = `${volumeLoaderScheme}:${volumeName}`; // VolumeId with loader id + volume id
+
+    const initVolumeLoader = async () => {
+        cornerstone.volumeLoader.registerUnknownVolumeLoader(cornerstoneStreamingImageVolumeLoader);
+        cornerstone.volumeLoader.registerVolumeLoader('cornerstoneStreamingImageVolume', cornerstoneStreamingImageVolumeLoader);
+        // cornerstone.imageLoader.registerImageLoader('wadouri', sharedArrayBufferImageLoader);
+    }
 
     useEffect(() => {
 
@@ -21,14 +32,17 @@ export default () => {
             //Configuration et initialisation des libraries
 
             await cornerstone.init();
+            await initVolumeLoader();
             initCornerstoneWADOImageLoader();
+
+
             const divAff = document.getElementById("viewer2");
 
             divAff.style.width = "500px"
             divAff.style.height = "500px"
 
-            const imageId = imageIdDefault + "?frame=" + 0
-            console.log(imageId)
+            const image = imageIdDefault; //+ "?frame=" + 0
+            const imageId = [image]
 
             const renderingEngine = new cornerstone.RenderingEngine(renderingEngineId)
 
@@ -42,15 +56,19 @@ export default () => {
                 },
             };
 
+            console.log(cornerstone.metaData.get('ProtocolName', imageId[0]))
+
             renderingEngine.enableElement(viewportInput);
 
             //Recuperation du viewport initialisé
             const viewport = renderingEngine.getViewport(viewportIdentifiant)
 
-            console.log(volumeId)
-
             //Definition du volume
-            const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId, { imageId });
+            const volumeId = 'cornerstoneStreamingImageVolume:myVolumeId';
+
+            const volume = await cornerstone.volumeLoader.createAndCacheVolume(volumeId, {
+                imageIds: imageId,
+            });
 
             volume.load();
 
