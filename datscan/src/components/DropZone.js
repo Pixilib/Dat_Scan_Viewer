@@ -21,6 +21,7 @@ export default (props) => {
 
 
     const onDrop = useCallback((acceptedFiles) => {
+        const files = []
         acceptedFiles.forEach((file) => {
             const reader = new FileReader()
 
@@ -31,8 +32,10 @@ export default (props) => {
                 const binaryStr = reader.result
             }
             reader.readAsArrayBuffer(file)
-            props.set(file);
+            files.push(file)
+            // props.set(file);
         })
+        props.set(files)
 
     }, [])
     const { getRootProps, getInputProps } = useDropzone({ onDrop })
