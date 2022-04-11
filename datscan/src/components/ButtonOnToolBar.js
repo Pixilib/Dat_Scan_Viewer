@@ -1,4 +1,4 @@
-export default ({ title, onClick, set }) => {
+export default ({ title, onClick }) => {
 
     return (
         <>

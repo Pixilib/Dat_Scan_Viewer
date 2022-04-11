@@ -1,25 +1,17 @@
-import { CONSTANTS, init, RenderingEngine, volumeLoader, Enums, metaData, setVolumesForViewports } from '@cornerstonejs/core';
+import { CONSTANTS, init, RenderingEngine, volumeLoader, Enums, metaData, setVolumesForViewports, getRenderingEngine } from '@cornerstonejs/core';
 import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import initCornerstoneWADOImageLoader from './initCornerstoneWADOImageLoader'
 import React, { Component, useEffect, useState } from 'react';
 import Drop from './DropZone';
-import setCtTransferFunctionForVolumeActor from './setCtTransferFunctionForVolumeActor';
-import {
-    cornerstoneStreamingImageVolumeLoader,
-    sharedArrayBufferImageLoader,
-} from '@cornerstonejs/streaming-image-volume-loader';
+import { cornerstoneStreamingImageVolumeLoader } from '@cornerstonejs/streaming-image-volume-loader';
 import { makeVolumeMetadata } from '@cornerstonejs/streaming-image-volume-loader/dist/esm/helpers';
+import ButtonOnToolBar from './ButtonOnToolBar';
+import DropDown from './DropDown';
 
 export default () => {
     const [files, setFiles] = useState([]);
-
     const viewportIdentifiant = 'CT_STACK'
-    const [count, setCount] = useState(0);
-
-
-    // const volumeName = 'CT_VOLUME_ID'; // Id of the volume less loader prefix
-    // const volumeLoaderScheme = 'cornerstoneStreamingImageVolume'; // Loader id which defines which volume loader to use
-    // const volumeId = `${volumeLoaderScheme}:${volumeName}`; // VolumeId with loader id + volume id
+    const renderingEngineId = 'myRenderingEngine';
 
     const buildImageId = (files) => {
         setFiles(files)
@@ -28,6 +20,36 @@ export default () => {
     useEffect(() => {
 
     }, [])
+
+    const buttonFlipV = () => {
+        const renderingEngine = getRenderingEngine(renderingEngineId)
+
+        // Get the volume viewport
+        const viewport = renderingEngine.getViewport(viewportIdentifiant)
+
+
+        // Flip the viewport vertically
+        const { flipVertical } = viewport.getProperties();
+
+        viewport.flip({ flipVertical: !flipVertical });
+
+        viewport.render();
+    }
+
+    const buttonFlipH = () => {
+        const renderingEngine = getRenderingEngine(renderingEngineId)
+
+        // Get the volume viewport
+        const viewport = renderingEngine.getViewport(viewportIdentifiant)
+
+
+        // Flip the viewport vertically
+        const { flipHorizontal } = viewport.getProperties();
+
+        viewport.flip({ flipHorizontal: !flipHorizontal });
+
+        viewport.render();
+    }
 
 
     useEffect(() => {
@@ -43,30 +65,30 @@ export default () => {
                 console.log(imageId)
                 imageIds.push(imageId)
             });
-            const firstImage = cornerstoneWADOImageLoader.wadouri.loadImage(imageIds[0])
-            const fImage = await firstImage["promise"]
+
+            for (let imageId of imageIds) {
+                const firstImage = cornerstoneWADOImageLoader.wadouri.loadImage(imageId)
+                const fImage = await firstImage["promise"]
+            }
+
             const volumeMetadata = makeVolumeMetadata(imageIds);
             console.log(volumeMetadata)
 
-            console.log(volumeLoader)
 
             const divAff = document.getElementById("viewer2");
 
             divAff.style.width = "500px"
             divAff.style.height = "500px"
-            const renderingEngineId = 'myRenderingEngine';
             const renderingEngine = new RenderingEngine(renderingEngineId)
 
             //Definition du volume
             const volumeId = 'cornerStreamingImageVolume: myVolume';
 
-            // const volume = await volumeLoader.createAndCacheVolume(volumeId, {
-            //     imageIds
-            // }).catch((error) => {
-            //     console.warn(error)
-            // });
-
-            const volume = volumeLoader.loadVolume(volumeId, { imageIds });
+            const volume = await volumeLoader.createAndCacheVolume(volumeId, {
+                imageIds
+            }).catch((error) => {
+                console.warn(error)
+            });
 
             console.log('mon volume :', volume)
 
@@ -79,28 +101,30 @@ export default () => {
                 },
             };
 
-            renderingEngine.enableElement(viewportInput);
-
-            const viewport = renderingEngine.getViewport(viewportIdentifiant)
-
+            renderingEngine.setViewports([viewportInput]);
             volume.load();
 
-            viewport.setVolumes([
-                { volumeId, callback: setCtTransferFunctionForVolumeActor },
-            ]);
+            setVolumesForViewports(renderingEngine, [{ volumeId }], [viewportIdentifiant]);
 
-            viewport.render();
+            renderingEngine.renderViewports([viewportIdentifiant]);
 
         }
+        if (files.length > 0) {
+            run()
+        }
 
-        run()
     }, [files])
 
     return (
         <>
             <h1>DatScan Viewer / Volume Viewport</h1>
             <Drop set={buildImageId}></Drop>
-            <div id="viewer2"></div>
+            <div id='toolbar' style={{ marginTop: '10px', marginBottom: '5px' }}>
+                <ButtonOnToolBar title={"Horizontal Flip"} onClick={buttonFlipH}></ButtonOnToolBar>
+                <ButtonOnToolBar title={"Vertical Flip"} onClick={buttonFlipV}></ButtonOnToolBar>
+                {/* <DropDown></DropDown> */}
+            </div>
+            <div id='viewer2'></div>
         </>
     )
 }
