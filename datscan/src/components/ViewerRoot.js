@@ -1,111 +1,22 @@
-import * as cornerstone from '@cornerstonejs/core';
+import { init, RenderingEngine, Enums, getRenderingEngine } from '@cornerstonejs/core';
 import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import initCornerstoneWADOImageLoader from './initCornerstoneWADOImageLoader'
 import React, { Component, useEffect, useState } from 'react';
 import Drop from './DropZone';
-import ButtonToToolbar from "./ButtonOnToolBar"
+import NexImageButton from './tools/NexImageButton';
+import FlipHorizontalButton from './tools/FlipHorizontalButton';
+import FlipVerticalButton from './tools/FlipVerticalButton';
+import PreviousImageButton from './tools/PreviousImageButton';
+import ResetButton from './tools/ResetButton';
 
 export default () => {
 
-    const [file, setfile] = useState(0);
+    const [file, setfile] = useState([]);
     const renderingEngineId = 'myEngine';
     const viewportIdentifiant = 'CT_STACK'
-    const [count, setCount] = useState(0);
-    let imageIdDefault = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
 
-    const buttonNextImage = () => {
-        if (file !== 0) {
-            //Recuperation de l'engine actuel
-            const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
-
-            //Recuperation de la div d'affichage
-            const divAff = document.getElementById("test")
-
-            const viewportInput = {
-                viewportId: viewportIdentifiant,
-                element: divAff,
-                type: cornerstone.Enums.ViewportType.STACK,
-            };
-            renderingEngine.enableElement(viewportInput);
-
-            //Recup du viewport
-            const viewport = renderingEngine.getViewport(viewportIdentifiant);
-
-            //On incremente l'index
-            setCount(count + 1);
-            const currentImageidIndex = imageIdDefault + "?frame=" + count;
-            console.log(currentImageidIndex)
-
-            const stack = [currentImageidIndex]
-            viewport.setStack(stack)
-            viewport.render()
-        }
-
-    }
-
-    const buttonPreviousImage = () => {
-        if (count > 0 && file !== 0) {
-            //Recuperation de l'engine actuel
-            const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
-
-            //Recuperation de la div d'affichage
-            const divAff = document.getElementById("test")
-
-            const viewportInput = {
-                viewportId: viewportIdentifiant,
-                element: divAff,
-                type: cornerstone.Enums.ViewportType.STACK,
-            };
-            renderingEngine.enableElement(viewportInput);
-            //Recup du vieport
-            const viewport = renderingEngine.getViewport(viewportIdentifiant);
-
-            //On décremente l'index
-            setCount(count - 1);
-            const currentImageidIndex = imageIdDefault + "?frame=" + count;
-            console.log(currentImageidIndex)
-
-            const stack = [currentImageidIndex]
-            viewport.setStack(stack)
-            viewport.render()
-        }
-
-    }
-
-    const buttonFlipH = () => {
-        const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
-
-        const viewport = renderingEngine.getViewport(viewportIdentifiant);
-
-        const { flipHorizontal } = viewport.getProperties();
-
-        viewport.setProperties({ flipHorizontal: !flipHorizontal });
-
-        viewport.render();
-    }
-
-    const buttonFlipV = () => {
-        const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
-
-        const viewport = renderingEngine.getViewport(viewportIdentifiant);
-
-        const { flipVertical } = viewport.getProperties();
-
-        viewport.setProperties({ flipVertical: !flipVertical });
-
-        viewport.render();
-    }
-
-    const buttonResetView = () => {
-        const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId)
-
-        const vieport = renderingEngine.getViewport(viewportIdentifiant)
-
-        //On reset la caméra
-        vieport.resetCamera();
-        //On reset les propriétes (deplacement H/V...)
-        vieport.resetProperties();
-        vieport.render();
+    const buildImageId = (file) => {
+        setfile(file)
     }
 
 
@@ -114,23 +25,24 @@ export default () => {
         const run = async () => {
             //Configuration et initialisation des libraries
 
-            await cornerstone.init();
+            await init();
             initCornerstoneWADOImageLoader();
             const divAff = document.getElementById("viewer");
 
             divAff.style.width = "500px"
             divAff.style.height = "500px"
 
+            let imageIdDefault = cornerstoneWADOImageLoader.wadouri.fileManager.add(file[0]);
             const imageId = imageIdDefault + "?frame=" + 0
             console.log(imageId)
 
-            const renderingEngine = new cornerstone.RenderingEngine(renderingEngineId)
+            const renderingEngine = new RenderingEngine(renderingEngineId)
 
 
             const viewportInput = {
                 viewportId: viewportIdentifiant,
                 element: divAff,
-                type: cornerstone.Enums.ViewportType.STACK,
+                type: Enums.ViewportType.STACK,
             };
 
             renderingEngine.enableElement(viewportInput);
@@ -142,7 +54,7 @@ export default () => {
 
             viewport.render()
         }
-        if (file !== 0) {
+        if (file.length > 0) {
             document.getElementById('toolbar').hidden = false
             run()
         } else {
@@ -155,13 +67,14 @@ export default () => {
     return (
         <>
             <h1>DatScan Viewer</h1>
-            <Drop set={setfile}></Drop>
+            <Drop set={buildImageId}></Drop>
             <div id='toolbar'>
-                <ButtonToToolbar title='Previous Image' onClick={buttonPreviousImage}></ButtonToToolbar>
-                <ButtonToToolbar title='Next Image' onClick={buttonNextImage}></ButtonToToolbar>
-                <ButtonToToolbar title='Horizontal Flip' onClick={buttonFlipH}></ButtonToToolbar>
-                <ButtonToToolbar title='Vertical Flip' onClick={buttonFlipV}></ButtonToToolbar>
-                <ButtonToToolbar title='Reset' onClick={buttonResetView}></ButtonToToolbar>
+                <PreviousImageButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></PreviousImageButton>
+                <NexImageButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></NexImageButton>
+                <FlipHorizontalButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></FlipHorizontalButton>
+                <FlipVerticalButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></FlipVerticalButton>
+                <ResetButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></ResetButton>
+
             </div>
             <div id="viewer"></div>
 

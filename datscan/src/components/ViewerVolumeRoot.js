@@ -5,59 +5,58 @@ import React, { Component, useEffect, useState } from 'react';
 import Drop from './DropZone';
 import { cornerstoneStreamingImageVolumeLoader } from '@cornerstonejs/streaming-image-volume-loader';
 import { makeVolumeMetadata } from '@cornerstonejs/streaming-image-volume-loader/dist/esm/helpers';
-import ButtonOnToolBar from './ButtonOnToolBar';
-import DropDown from './DropDown';
+import FlipVerticalButton from './tools/FlipVerticalButton';
+import FlipHorizontalButton from './tools/FlipHorizontalButton';
+import ResetButton from './tools/ResetButton';
+import ListOrientation from './tools/ListOrientation';
+import { addTool, LengthTool, ToolGroupManager, StackScrollMouseWheelTool, init as ToolInit } from '@cornerstonejs/tools';
+import { MouseBindings } from '@cornerstonejs/tools/dist/esm/enums';
 
 export default () => {
     const [files, setFiles] = useState([]);
     const viewportIdentifiant = 'CT_STACK'
     const renderingEngineId = 'myRenderingEngine';
+    const toolGroupId = 'STACK_TOOL_GROUP_ID'
+    //Definition du volume
+    const volumeId = 'cornerStreamingImageVolume: myVolume';
 
     const buildImageId = (files) => {
         setFiles(files)
 
     }
-    useEffect(() => {
-
-    }, [])
-
-    const buttonFlipV = () => {
-        const renderingEngine = getRenderingEngine(renderingEngineId)
-
-        // Get the volume viewport
-        const viewport = renderingEngine.getViewport(viewportIdentifiant)
-
-
-        // Flip the viewport vertically
-        const { flipVertical } = viewport.getProperties();
-
-        viewport.flip({ flipVertical: !flipVertical });
-
-        viewport.render();
-    }
-
-    const buttonFlipH = () => {
-        const renderingEngine = getRenderingEngine(renderingEngineId)
-
-        // Get the volume viewport
-        const viewport = renderingEngine.getViewport(viewportIdentifiant)
-
-
-        // Flip the viewport vertically
-        const { flipHorizontal } = viewport.getProperties();
-
-        viewport.flip({ flipHorizontal: !flipHorizontal });
-
-        viewport.render();
-    }
-
 
     useEffect(() => {
 
         const run = async () => {
             //Configuration et initialisation des libraries
             await init();
+            await ToolInit();
             initCornerstoneWADOImageLoader();
+
+            //On ajoute les outils souhaités
+            addTool(LengthTool);
+            addTool(StackScrollMouseWheelTool);
+
+
+            //Définition du groupe qui va contenir tout les outils
+            const toolGroup = ToolGroupManager.createToolGroup(toolGroupId);
+
+            //Ajout des outils dans le groupe et en les liant au volume
+            toolGroup.addTool(LengthTool.toolName, { configuration: { volumeId } });
+            toolGroup.addTool(StackScrollMouseWheelTool.toolName);
+
+            //Outil lenght sur le click gauche souris
+            toolGroup.setToolActive(LengthTool.toolName, {
+                bindings: [
+                    {
+                        mouseButton: MouseBindings.Primary,
+                    },
+                ],
+            });
+
+            //De base sur la molette
+            toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
+
             volumeLoader.registerVolumeLoader('cornerStreamingImageVolume', cornerstoneStreamingImageVolumeLoader);
             let imageIds = []
             files.forEach(file => {
@@ -81,27 +80,27 @@ export default () => {
             divAff.style.height = "500px"
             const renderingEngine = new RenderingEngine(renderingEngineId)
 
-            //Definition du volume
-            const volumeId = 'cornerStreamingImageVolume: myVolume';
-
-            const volume = await volumeLoader.createAndCacheVolume(volumeId, {
-                imageIds
-            }).catch((error) => {
-                console.warn(error)
-            });
-
-            console.log('mon volume :', volume)
-
             const viewportInput = {
                 viewportId: viewportIdentifiant,
                 element: divAff,
                 type: Enums.ViewportType.ORTHOGRAPHIC,
                 defaultOptions: {
-                    orientation: CONSTANTS.ORIENTATION.SAGITTAL,
+                    orientation: CONSTANTS.ORIENTATION.AXIAL,
                 },
             };
 
             renderingEngine.setViewports([viewportInput]);
+
+            //Ajout des outils au viewport
+            toolGroup.addViewport(viewportIdentifiant, renderingEngineId);
+
+            const volume = await volumeLoader.createAndCacheVolume(volumeId, {
+                imageIds
+            });
+
+            console.log('mon volume :', volume)
+            console.log("tool :", renderingEngine)
+
             volume.load();
 
             setVolumesForViewports(renderingEngine, [{ volumeId }], [viewportIdentifiant]);
@@ -110,7 +109,10 @@ export default () => {
 
         }
         if (files.length > 0) {
+            document.getElementById('toolbar').hidden = false
             run()
+        } else {
+            document.getElementById('toolbar').hidden = true
         }
 
     }, [files])
@@ -120,9 +122,10 @@ export default () => {
             <h1>DatScan Viewer / Volume Viewport</h1>
             <Drop set={buildImageId}></Drop>
             <div id='toolbar' style={{ marginTop: '10px', marginBottom: '5px' }}>
-                <ButtonOnToolBar title={"Horizontal Flip"} onClick={buttonFlipH}></ButtonOnToolBar>
-                <ButtonOnToolBar title={"Vertical Flip"} onClick={buttonFlipV}></ButtonOnToolBar>
-                {/* <DropDown></DropDown> */}
+                <FlipVerticalButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></FlipVerticalButton>
+                <FlipHorizontalButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></FlipHorizontalButton>
+                <ListOrientation renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></ListOrientation>
+                <ResetButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></ResetButton>
             </div>
             <div id='viewer2'></div>
         </>
