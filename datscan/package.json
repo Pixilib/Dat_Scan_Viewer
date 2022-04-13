@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@cornerstonejs/core": "^0.3.4",
+    "@cornerstonejs/core": "^0.4.5",
     "@cornerstonejs/streaming-image-volume-loader": "^0.2.13",
     "@cornerstonejs/tools": "^0.7.9",
     "@testing-library/jest-dom": "^5.16.3",
