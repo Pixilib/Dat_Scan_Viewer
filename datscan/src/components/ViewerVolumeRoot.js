@@ -53,50 +53,6 @@ export default () => {
             },
         ]);
     }
-    const viewportColors = {
-        [viewportId1]: 'rgb(200, 0, 0)',
-        [viewportId2]: 'rgb(200, 200, 0)',
-        [viewportId3]: 'rgb(0, 200, 0)',
-    };
-
-    const viewportReferenceLineControllable = [
-        viewportId1,
-        viewportId2,
-        viewportId3,
-    ];
-
-    const viewportReferenceLineDraggableRotatable = [
-        viewportId1,
-        viewportId2,
-        viewportId3,
-    ];
-
-    const viewportReferenceLineSlabThicknessControlsOn = [
-        viewportId1,
-        viewportId2,
-        viewportId3,
-    ];
-
-    function getReferenceLineColor(viewportId) {
-        return viewportColors[viewportId];
-    }
-
-    function getReferenceLineControllable(viewportId) {
-        const index = viewportReferenceLineControllable.indexOf(viewportId);
-        return index !== -1;
-    }
-
-    function getReferenceLineDraggableRotatable(viewportId) {
-        const index = viewportReferenceLineDraggableRotatable.indexOf(viewportId);
-        return index !== -1;
-    }
-
-    function getReferenceLineSlabThicknessControlsOn(viewportId) {
-        const index =
-            viewportReferenceLineSlabThicknessControlsOn.indexOf(viewportId);
-        return index !== -1;
-    }
-
 
     useEffect(() => {
 
@@ -108,8 +64,8 @@ export default () => {
 
             //On ajoute les outils souhaités
             // addTool(LengthTool);
-            addTool(StackScrollMouseWheelTool);
             addTool(ZoomTool);
+            addTool(StackScrollMouseWheelTool);
             addTool(SegmentationDisplayTool);
             addTool(RectangleScissorsTool);
             addTool(CircleScissorsTool);
@@ -123,42 +79,15 @@ export default () => {
             //Définition du groupe qui va contenir tout les outils
             const toolGroup = ToolGroupManager.createToolGroup(toolGroupId);
 
-            //Ajout des outils dans le groupe et en les liant au volume
-            // toolGroup.addTool(LengthTool.toolName, { configuration: { volumeId } });
-            toolGroup.addTool(StackScrollMouseWheelTool.toolName);
-            toolGroup.addTool(ZoomTool.toolName);
 
-            // Segmentation Tools
+            // // Segmentation Tools
             toolGroup.addTool(SegmentationDisplayTool.toolName);
             toolGroup.addTool(RectangleScissorsTool.toolName);
             toolGroup.addTool(CircleScissorsTool.toolName);
             toolGroup.addTool(SphereScissorsTool.toolName);
             toolGroup.addTool(BrushTool.toolName);
+            toolGroup.addTool(ZoomTool.toolName)
             toolGroup.setToolEnabled(SegmentationDisplayTool.toolName);
-
-            // const Activatedtool = toolGroup.getActivePrimaryMouseButtonTool();
-            // toolGroup.setToolDisabled(Activatedtool);
-
-
-            //Outil lenght sur le click gauche souris
-            // toolGroup.setToolActive(LengthTool.toolName, {
-            //     bindings: [
-            //         {
-            //             mouseButton: MouseBindings.Primary,
-            //         },
-            //     ],
-            // });
-
-            //De base sur la molette
-            toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
-
-            toolGroup.setToolActive(ZoomTool.toolName, {
-                bindings: [
-                    {
-                        mouseButton: MouseBindings.Secondary,
-                    },
-                ],
-            });
 
             volumeLoader.registerVolumeLoader('cornerStreamingImageVolume', cornerstoneStreamingImageVolumeLoader);
             let imageIds = []
@@ -203,6 +132,10 @@ export default () => {
 
             divContent.appendChild(divViewports);
 
+            const volume = await volumeLoader.createAndCacheVolume(volumeId, {
+                imageIds
+            });
+
             const renderingEngine = new RenderingEngine(renderingEngineId)
 
             const viewportInput = [{
@@ -211,6 +144,7 @@ export default () => {
                 type: Enums.ViewportType.ORTHOGRAPHIC,
                 defaultOptions: {
                     orientation: CONSTANTS.ORIENTATION.AXIAL,
+                    background: [0, 0, 0],
                 },
             },
             {
@@ -219,6 +153,7 @@ export default () => {
                 type: Enums.ViewportType.ORTHOGRAPHIC,
                 defaultOptions: {
                     orientation: CONSTANTS.ORIENTATION.SAGITTAL,
+                    background: [0, 0, 0],
                 },
             },
             {
@@ -227,40 +162,32 @@ export default () => {
                 type: Enums.ViewportType.ORTHOGRAPHIC,
                 defaultOptions: {
                     orientation: CONSTANTS.ORIENTATION.CORONAL,
+                    background: [0, 0, 0],
                 },
             }];
 
             renderingEngine.setViewports(viewportInput);
+
+            await addSegmentationsToState();
+
+            volume.load();
+
+            await setVolumesForViewports(renderingEngine, [{ volumeId }], [viewportId1, viewportId2, viewportId3]);
+
 
             //Ajout des outils au viewport
             toolGroup.addViewport(viewportId1, renderingEngineId);
             toolGroup.addViewport(viewportId2, renderingEngineId);
             toolGroup.addViewport(viewportId3, renderingEngineId);
 
-            toolGroup.addTool(CrosshairsTool.toolName, {
-                getReferenceLineColor,
-                getReferenceLineControllable,
-                getReferenceLineDraggableRotatable,
-                getReferenceLineSlabThicknessControlsOn,
+            toolGroup.addTool(StackScrollMouseWheelTool.toolName);
+
+            //De base sur la molette
+            toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
+            toolGroup.setToolActive(ZoomTool.toolName, {
+                bindings: [{ mouseButton: MouseBindings.Secondary }],
             });
 
-            toolGroup.setToolActive(CrosshairsTool.toolName, {
-                bindings: [{ mouseButton: MouseBindings.Primary }],
-            });
-
-
-            const volume = await volumeLoader.createAndCacheVolume(volumeId, {
-                imageIds
-            });
-
-            await addSegmentationsToState();
-
-            console.log('mon volume :', volume)
-            console.log("tool :", renderingEngine)
-
-            volume.load();
-
-            setVolumesForViewports(renderingEngine, [{ volumeId }], [viewportId1, viewportId2, viewportId3]);
 
             await segmentation.addSegmentationRepresentations(toolGroupId, [
                 {
@@ -293,8 +220,8 @@ export default () => {
                 {/* <FlipHorizontalButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></FlipHorizontalButton> */}
                 {/* <ListOrientation renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></ListOrientation> */}
                 {/* <ResetButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></ResetButton> */}
-                {/* <ListSegmentation toolGroupId={toolGroupId}></ListSegmentation> */}
-                {/* <CrossHair toolGroupId={toolGroupId} vId1={viewportId1} vId2={viewportId2} vId3={viewportId3}></CrossHair> */}
+                <ListSegmentation toolGroupId={toolGroupId}></ListSegmentation>
+                <CrossHair toolGroupId={toolGroupId} vId1={viewportId1} vId2={viewportId2} vId3={viewportId3}></CrossHair>
             </div>
             <div id='content'></div>
         </>

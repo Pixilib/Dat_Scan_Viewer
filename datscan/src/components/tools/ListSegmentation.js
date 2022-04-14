@@ -6,13 +6,11 @@ export default ({ toolGroupId }) => {
 
     const changeTool = () => {
         const toolName = $('#segmentation-select option:selected').text();
-        const tools = [BrushTool.toolName, RectangleScissorsTool.toolName, CircleScissorsTool.toolName, SphereScissorsTool.toolName]
-
         const toolGroup = ToolGroupManager.getToolGroup(toolGroupId)
 
-        tools.forEach(tool => {
-            toolGroup.setToolDisabled(tool);
-        });
+        const activeTool = toolGroup.getActivePrimaryMouseButtonTool();
+        toolGroup.setToolDisabled(activeTool);
+
 
         switch (toolName) {
             case 'Brush':
@@ -38,9 +36,6 @@ export default ({ toolGroupId }) => {
                     bindings: [{ mouseButton: csEnums.MouseBindings.Primary }],
                 });
                 break;
-
-            default:
-                throw new Error('undefined tool option');
         }
 
     }
@@ -50,7 +45,8 @@ export default ({ toolGroupId }) => {
 
     return (
         <>
-            <select name="tools" id="segmentation-select" defaultValue={'Brush'} onChange={changeTool}>
+            <select name="tools" id="segmentation-select" defaultValue={'Sélectionner un outil'} onChange={changeTool}>
+                <option>Sélectionner un outil</option>
                 <option>Brush</option>
                 <option>RectangleScissor</option>
                 <option>CircleScissor</option>

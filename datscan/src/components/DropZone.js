@@ -11,10 +11,10 @@ export default (props) => {
         padding: '20px',
         borderWidth: 2,
         borderRadius: 2,
-        borderColor: '#eeeeee',
+        // borderColor: '#eeeeee',
         borderStyle: 'dashed',
         backgroundColor: '#fafafa',
-        color: '#bdbdbd',
+        color: '#fffff',
         outline: 'none',
         transition: 'border .24s ease-in-out'
     };

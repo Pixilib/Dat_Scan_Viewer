@@ -1,7 +1,5 @@
-import './App.css';
 import ViewerRoot from './components/ViewerRoot';
 import ViewerVolumeRoot from './components/ViewerVolumeRoot';
-
 
 function App() {
 
