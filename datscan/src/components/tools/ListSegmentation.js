@@ -45,8 +45,8 @@ export default ({ toolGroupId }) => {
 
     return (
         <>
-            <select name="tools" id="segmentation-select" defaultValue={'Sélectionner un outil'} onChange={changeTool}>
-                <option>Sélectionner un outil</option>
+            <select name="tools" id="segmentation-select" defaultValue={'Sélectionner un type'} onChange={changeTool}>
+                <option>Sélectionner un type</option>
                 <option>Brush</option>
                 <option>RectangleScissor</option>
                 <option>CircleScissor</option>

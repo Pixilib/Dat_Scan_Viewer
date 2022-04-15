@@ -67,9 +67,6 @@ export default ({ toolGroupId, vId1, vId2, vId3 }) => {
 
     }
 
-
-
-
     return (
         <>
             <button id='button-crosshair' onClick={activateCrosshair}>CrossHair</button>

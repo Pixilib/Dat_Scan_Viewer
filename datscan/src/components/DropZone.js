@@ -14,7 +14,7 @@ export default (props) => {
         // borderColor: '#eeeeee',
         borderStyle: 'dashed',
         backgroundColor: '#fafafa',
-        color: '#fffff',
+        color: '#00000',
         outline: 'none',
         transition: 'border .24s ease-in-out'
     };
