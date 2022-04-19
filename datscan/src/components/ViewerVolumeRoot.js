@@ -1,4 +1,4 @@
-import { CONSTANTS, init, RenderingEngine, volumeLoader, Enums, metaData, setVolumesForViewports, getRenderingEngine, VolumeViewport } from '@cornerstonejs/core';
+import { CONSTANTS, init, RenderingEngine, volumeLoader, Enums, metaData, setVolumesForViewports, getRenderingEngine, VolumeViewport, utilities as csCoreUti } from '@cornerstonejs/core';
 import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import initCornerstoneWADOImageLoader from './initCornerstoneWADOImageLoader'
 import React, { Component, useEffect, useState } from 'react';
@@ -9,7 +9,7 @@ import FlipVerticalButton from './tools/FlipVerticalButton';
 import FlipHorizontalButton from './tools/FlipHorizontalButton';
 import ResetButton from './tools/ResetButton';
 import ListOrientation from './tools/ListOrientation';
-import { addTool, LengthTool, CrosshairsTool, ToolGroupManager, SegmentationDisplayTool, StackScrollMouseWheelTool, segmentation, ZoomTool, init as ToolInit, BrushTool, RectangleScissorsTool, CircleScissorsTool, SphereScissorsTool, Enums as csEnums } from '@cornerstonejs/tools';
+import { addTool, LengthTool, CrosshairsTool, ToolGroupManager, SegmentationDisplayTool, StackScrollMouseWheelTool, segmentation, ZoomTool, init as ToolInit, BrushTool, RectangleScissorsTool, CircleScissorsTool, SphereScissorsTool, Enums as csEnums, utilities } from '@cornerstonejs/tools';
 import { MouseBindings } from '@cornerstonejs/tools/dist/esm/enums';
 import ListSegmentation from './tools/ListSegmentation';
 import CrossHair from './tools/CrossHair';
@@ -25,6 +25,28 @@ export default () => {
     const viewportId2 = 'CT_SAGITTAL';
     const viewportId3 = 'CT_CORONAL';
     const volumeId = 'cornerStreamingImageVolume: myVolume';
+
+    function getValue(volume, worldPos) {
+        const { dimensions, scalarData, imageData } = volume;
+
+        const index = imageData.worldToIndex(worldPos);
+
+        index[0] = Math.floor(index[0]);
+        index[1] = Math.floor(index[1]);
+        index[2] = Math.floor(index[2]);
+
+        if (!csCoreUti.indexWithinDimensions(index, dimensions)) {
+            return;
+        }
+
+        const yMultiple = dimensions[0];
+        const zMultiple = dimensions[0] * dimensions[1];
+
+        const value =
+            scalarData[index[2] * zMultiple + index[1] * yMultiple + index[0]];
+
+        return value;
+    }
 
     const buildImageId = (files) => {
         setFiles(files)
@@ -111,12 +133,12 @@ export default () => {
             // addTool(LengthTool);
             addTool(ZoomTool);
             addTool(StackScrollMouseWheelTool);
-            addTool(SegmentationDisplayTool);
-            addTool(RectangleScissorsTool);
-            addTool(CircleScissorsTool);
-            addTool(SphereScissorsTool);
-            addTool(BrushTool);
-            addTool(CrosshairsTool);
+            // addTool(SegmentationDisplayTool);
+            // addTool(RectangleScissorsTool);
+            // addTool(CircleScissorsTool);
+            // addTool(SphereScissorsTool);
+            // addTool(BrushTool);
+            addTool(CrosshairsTool)
 
             volumeLoader.registerVolumeLoader('cornerStreamingImageVolume', cornerstoneStreamingImageVolumeLoader);
             let imageIds = []
@@ -139,14 +161,17 @@ export default () => {
             divViewports.style.flexDirection = 'row';
 
             const element1 = document.createElement('div');
+            element1.id = 'view1';
             const element2 = document.createElement('div');
+            element2.id = 'view2';
             const element3 = document.createElement('div');
+            element3.id = 'view3';
 
-            element1.style.width = '500px';
+            element1.style.width = '409px';
             element1.style.height = '500px';
-            element2.style.width = '500px';
+            element2.style.width = '409px';
             element2.style.height = '500px';
-            element3.style.width = '500px';
+            element3.style.width = '409px';
             element3.style.height = '500px';
 
             element1.oncontextmenu = (e) => e.preventDefault();
@@ -211,6 +236,7 @@ export default () => {
 
             //Définition du groupe qui va contenir tout les outils
             const toolGroup = ToolGroupManager.createToolGroup(toolGroupId);
+            console.log(toolGroup)
 
             //Ajout des outils au viewport
             toolGroup.addViewport(viewportId1, renderingEngineId);
@@ -218,13 +244,13 @@ export default () => {
             toolGroup.addViewport(viewportId3, renderingEngineId);
 
             // // Segmentation Tools
-            toolGroup.addTool(SegmentationDisplayTool.toolName);
-            toolGroup.addTool(RectangleScissorsTool.toolName);
-            toolGroup.addTool(CircleScissorsTool.toolName);
-            toolGroup.addTool(SphereScissorsTool.toolName);
-            toolGroup.addTool(BrushTool.toolName);
+            // toolGroup.addTool(SegmentationDisplayTool.toolName);
+            // toolGroup.addTool(RectangleScissorsTool.toolName);
+            // toolGroup.addTool(CircleScissorsTool.toolName);
+            // toolGroup.addTool(SphereScissorsTool.toolName);
+            // toolGroup.addTool(BrushTool.toolName);
             toolGroup.addTool(ZoomTool.toolName)
-            toolGroup.setToolEnabled(SegmentationDisplayTool.toolName);
+            // toolGroup.setToolEnabled(SegmentationDisplayTool.toolName);
 
 
             toolGroup.addTool(StackScrollMouseWheelTool.toolName);
@@ -235,30 +261,39 @@ export default () => {
                 getReferenceLineSlabThicknessControlsOn,
             });
 
+            console.log(toolGroup.getToolInstance(CrosshairsTool.toolName));
+
             //De base sur la molette
             toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
+            toolGroup.setToolEnabled(CrosshairsTool.toolName);
             toolGroup.setToolActive(ZoomTool.toolName, {
                 bindings: [{ mouseButton: MouseBindings.Secondary }],
             });
-            toolGroup.setToolActive(CrosshairsTool.toolName, {
-                bindings: [{ mouseButton: csEnums.MouseBindings.Primary }],
-            });
 
-            await segmentation.addSegmentationRepresentations(toolGroupId, [
-                {
-                    segmentationId,
-                    type: csEnums.SegmentationRepresentations.Labelmap,
-                },
-            ]);
+            // await segmentation.addSegmentationRepresentations(toolGroupId, [
+            //     {
+            //         segmentationId,
+            //         type: csEnums.SegmentationRepresentations.Labelmap,
+            //     },
+            // ]);
 
             const viewp1 = renderingEngine.getViewport(viewportId1)
             console.log("Viewport 1 : ", viewp1)
+            console.log('i 1 = ', viewp1.getRenderingEngine());
             const viewp1Data = viewp1.getImageData();
-            console.log(viewp1Data['imageData']);
-            console.log(viewp1Data['imageData'].getNumberOfCells());
-            console.log(viewp1Data['imageData'].getNumberOfPoints());
-            console.log(viewp1Data['imageData'].getPointData().getArrays()[0].getData());
+            console.log('ici ', viewp1Data['imageData'].getPointData().getArrays()[0]);
+            console.log('ici ', viewp1Data['imageData'].getPointData().getArrays()[0].get());
+            // console.log(viewp1Data['imageData']);
+            // console.log(viewp1Data['imageData'].getPoint(20000));
+            // console.log('Matrice point VP1', viewp1Data['imageData'].getPointData().getArrays()[0].getData());
 
+
+            const viewp2 = renderingEngine.getViewport(viewportId2)
+            console.log("Viewport 2 : ", viewp2)
+            console.log('i2 = ', viewp2.getIntensityFromWorld([-6.347661226987839, -98.19442749023438, -1114.5250244140625]))
+            const viewp2Data = viewp2.getImageData();
+            // console.log(viewp2Data['imageData'].getPoint(20000));
+            // console.log('Matrice point VP2', viewp2Data['imageData'].getPointData().getArrays()[0].getData());
 
             renderingEngine.renderViewports([viewportId1, viewportId2, viewportId3]);
 
@@ -272,6 +307,59 @@ export default () => {
 
     }, [files])
 
+    const getCoord = () => {
+        const elementView1 = document.getElementById('view1');
+        const elementView2 = document.getElementById('view2');
+        const elementView3 = document.getElementById('view3');
+
+        const elementCanvas1 = document.getElementById('canvasC1');
+        const elementWorld1 = document.getElementById('worldC1');
+        const elementCanvas2 = document.getElementById('canvasC2');
+        const elementWorld2 = document.getElementById('worldC2');
+        const elementCanvas3 = document.getElementById('canvasC3');
+        const elementWorld3 = document.getElementById('worldC3');
+
+        const renderingEngine = getRenderingEngine(renderingEngineId);
+        const viewp1 = renderingEngine.getViewport(viewportId1);
+        const viewp2 = renderingEngine.getViewport(viewportId2);
+        const viewp3 = renderingEngine.getViewport(viewportId3);
+
+        elementView1.addEventListener('mousemove', (evt) => {
+            const rect = elementView1.getBoundingClientRect();
+
+            const canvasPos = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
+            const worldPos = viewp1.canvasToWorld(canvasPos);
+
+            elementCanvas1.innerHTML = 'Canvas : ' + canvasPos[0] + ' , ' + canvasPos[1];
+            elementWorld1.innerHTML = 'World : ' + worldPos[0].toFixed(2) + ' , ' + worldPos[1].toFixed(2) + ' , ' + worldPos[2].toFixed(2);
+        });
+
+        elementView2.addEventListener('mousemove', (evt) => {
+            const rect = elementView2.getBoundingClientRect();
+
+            const canvasPos = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
+            const worldPos = viewp2.canvasToWorld(canvasPos);
+
+            elementCanvas2.innerHTML = 'Canvas : ' + canvasPos[0] + ' , ' + canvasPos[1];
+            elementWorld2.innerHTML = 'World : ' + worldPos[0].toFixed(2) + ' , ' + worldPos[1].toFixed(2) + ' , ' + worldPos[2].toFixed(2);
+        });
+
+        elementView3.addEventListener('mousemove', (evt) => {
+            const rect = elementView3.getBoundingClientRect();
+
+            const canvasPos = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
+            const worldPos = viewp3.canvasToWorld(canvasPos);
+
+            elementCanvas3.innerHTML = 'Canvas : ' + canvasPos[0] + ' , ' + canvasPos[1];
+            elementWorld3.innerHTML = 'World : ' + worldPos[0].toFixed(2) + ' , ' + worldPos[1].toFixed(2) + ' , ' + worldPos[2].toFixed(2);
+        });
+
+        const toolGroup = ToolGroupManager.getToolGroup(toolGroupId);
+        toolGroup.setToolActive(CrosshairsTool.toolName, {
+            bindings: [{ mouseButton: MouseBindings.Primary }]
+        });
+    }
+
     return (
         <>
             <h1>DatScan Viewer / Volume Viewport</h1>
@@ -281,10 +369,22 @@ export default () => {
                 {/* <FlipHorizontalButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></FlipHorizontalButton> */}
                 {/* <ListOrientation renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></ListOrientation> */}
                 {/* <ResetButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></ResetButton> */}
-                <ListSegmentation toolGroupId={toolGroupId}></ListSegmentation>
+                {/* <ListSegmentation toolGroupId={toolGroupId}></ListSegmentation> */}
                 {/* <CrossHair toolGroupId={toolGroupId} vId1={viewportId1} vId2={viewportId2} vId3={viewportId3}></CrossHair> */}
+                <button onClick={getCoord}>ici</button>
             </div>
-            <div id='content'></div>
+            <div id='content'>
+            </div>
+            <div id='toolbar' style={{ display: 'flex' }}>
+                <p id='canvasC1' style={{ color: 'white', marginRight: '10px' }}>Canvas : </p>
+                <p id='worldC1' style={{ color: 'white', marginRight: '20px' }}>World  : </p>
+
+                <p id='canvasC2' style={{ color: 'white', marginRight: '10px' }}>Canvas : </p>
+                <p id='worldC2' style={{ color: 'white', marginRight: '20px' }}>World  : </p>
+
+                <p id='canvasC3' style={{ color: 'white', marginRight: '10px' }}>Canvas : </p>
+                <p id='worldC3' style={{ color: 'white', marginRight: '20px' }}>World  : </p>
+            </div>
         </>
     )
 }
