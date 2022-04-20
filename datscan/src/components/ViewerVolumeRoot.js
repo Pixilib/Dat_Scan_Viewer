@@ -14,6 +14,9 @@ import { MouseBindings } from '@cornerstonejs/tools/dist/esm/enums';
 import ListSegmentation from './tools/ListSegmentation';
 import CrossHair from './tools/CrossHair';
 import setCtTransferFunctionForVolumeActor from './setCtTransferFunctionForVolumeActor';
+import $ from 'jquery'
+import CoordsOnCursor from './tools/coordsOnCursor';
+import Test from './tools/test';
 
 export default () => {
     const [files, setFiles] = useState([]);
@@ -51,50 +54,6 @@ export default () => {
     const buildImageId = (files) => {
         setFiles(files)
 
-    }
-
-    const viewportColors = {
-        [viewportId1]: 'rgb(200, 0, 0)',
-        [viewportId2]: 'rgb(200, 200, 0)',
-        [viewportId3]: 'rgb(0, 200, 0)',
-    };
-
-    const viewportReferenceLineControllable = [
-        viewportId1,
-        viewportId2,
-        viewportId3,
-    ];
-
-    const viewportReferenceLineDraggableRotatable = [
-        viewportId1,
-        viewportId2,
-        viewportId3,
-    ];
-
-    const viewportReferenceLineSlabThicknessControlsOn = [
-        viewportId1,
-        viewportId2,
-        viewportId3,
-    ];
-
-    function getReferenceLineColor(viewportId) {
-        return viewportColors[viewportId];
-    }
-
-    function getReferenceLineControllable(viewportId) {
-        const index = viewportReferenceLineControllable.indexOf(viewportId);
-        return index !== -1;
-    }
-
-    function getReferenceLineDraggableRotatable(viewportId) {
-        const index = viewportReferenceLineDraggableRotatable.indexOf(viewportId);
-        return index !== -1;
-    }
-
-    function getReferenceLineSlabThicknessControlsOn(viewportId) {
-        const index =
-            viewportReferenceLineSlabThicknessControlsOn.indexOf(viewportId);
-        return index !== -1;
     }
 
     async function addSegmentationsToState() {
@@ -157,6 +116,7 @@ export default () => {
 
             const divContent = document.getElementById("content");
             const divViewports = document.createElement("div");
+            divViewports.id = 'divView';
             divViewports.style.display = 'flex';
             divViewports.style.flexDirection = 'row';
 
@@ -254,18 +214,9 @@ export default () => {
 
 
             toolGroup.addTool(StackScrollMouseWheelTool.toolName);
-            toolGroup.addTool(CrosshairsTool.toolName, {
-                getReferenceLineColor,
-                getReferenceLineControllable,
-                getReferenceLineDraggableRotatable,
-                getReferenceLineSlabThicknessControlsOn,
-            });
-
-            console.log(toolGroup.getToolInstance(CrosshairsTool.toolName));
 
             //De base sur la molette
             toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
-            toolGroup.setToolEnabled(CrosshairsTool.toolName);
             toolGroup.setToolActive(ZoomTool.toolName, {
                 bindings: [{ mouseButton: MouseBindings.Secondary }],
             });
@@ -281,8 +232,8 @@ export default () => {
             console.log("Viewport 1 : ", viewp1)
             console.log('i 1 = ', viewp1.getRenderingEngine());
             const viewp1Data = viewp1.getImageData();
-            console.log('ici ', viewp1Data['imageData'].getPointData().getArrays()[0]);
-            console.log('ici ', viewp1Data['imageData'].getPointData().getArrays()[0].get());
+            // console.log('ici ', viewp1Data['imageData'].getPointData().getArrays()[0]);
+            // console.log('ici ', viewp1Data['imageData'].getPointData().getArrays()[0].get());
             // console.log(viewp1Data['imageData']);
             // console.log(viewp1Data['imageData'].getPoint(20000));
             // console.log('Matrice point VP1', viewp1Data['imageData'].getPointData().getArrays()[0].getData());
@@ -290,7 +241,6 @@ export default () => {
 
             const viewp2 = renderingEngine.getViewport(viewportId2)
             console.log("Viewport 2 : ", viewp2)
-            console.log('i2 = ', viewp2.getIntensityFromWorld([-6.347661226987839, -98.19442749023438, -1114.5250244140625]))
             const viewp2Data = viewp2.getImageData();
             // console.log(viewp2Data['imageData'].getPoint(20000));
             // console.log('Matrice point VP2', viewp2Data['imageData'].getPointData().getArrays()[0].getData());
@@ -307,59 +257,6 @@ export default () => {
 
     }, [files])
 
-    const getCoord = () => {
-        const elementView1 = document.getElementById('view1');
-        const elementView2 = document.getElementById('view2');
-        const elementView3 = document.getElementById('view3');
-
-        const elementCanvas1 = document.getElementById('canvasC1');
-        const elementWorld1 = document.getElementById('worldC1');
-        const elementCanvas2 = document.getElementById('canvasC2');
-        const elementWorld2 = document.getElementById('worldC2');
-        const elementCanvas3 = document.getElementById('canvasC3');
-        const elementWorld3 = document.getElementById('worldC3');
-
-        const renderingEngine = getRenderingEngine(renderingEngineId);
-        const viewp1 = renderingEngine.getViewport(viewportId1);
-        const viewp2 = renderingEngine.getViewport(viewportId2);
-        const viewp3 = renderingEngine.getViewport(viewportId3);
-
-        elementView1.addEventListener('mousemove', (evt) => {
-            const rect = elementView1.getBoundingClientRect();
-
-            const canvasPos = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
-            const worldPos = viewp1.canvasToWorld(canvasPos);
-
-            elementCanvas1.innerHTML = 'Canvas : ' + canvasPos[0] + ' , ' + canvasPos[1];
-            elementWorld1.innerHTML = 'World : ' + worldPos[0].toFixed(2) + ' , ' + worldPos[1].toFixed(2) + ' , ' + worldPos[2].toFixed(2);
-        });
-
-        elementView2.addEventListener('mousemove', (evt) => {
-            const rect = elementView2.getBoundingClientRect();
-
-            const canvasPos = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
-            const worldPos = viewp2.canvasToWorld(canvasPos);
-
-            elementCanvas2.innerHTML = 'Canvas : ' + canvasPos[0] + ' , ' + canvasPos[1];
-            elementWorld2.innerHTML = 'World : ' + worldPos[0].toFixed(2) + ' , ' + worldPos[1].toFixed(2) + ' , ' + worldPos[2].toFixed(2);
-        });
-
-        elementView3.addEventListener('mousemove', (evt) => {
-            const rect = elementView3.getBoundingClientRect();
-
-            const canvasPos = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
-            const worldPos = viewp3.canvasToWorld(canvasPos);
-
-            elementCanvas3.innerHTML = 'Canvas : ' + canvasPos[0] + ' , ' + canvasPos[1];
-            elementWorld3.innerHTML = 'World : ' + worldPos[0].toFixed(2) + ' , ' + worldPos[1].toFixed(2) + ' , ' + worldPos[2].toFixed(2);
-        });
-
-        const toolGroup = ToolGroupManager.getToolGroup(toolGroupId);
-        toolGroup.setToolActive(CrosshairsTool.toolName, {
-            bindings: [{ mouseButton: MouseBindings.Primary }]
-        });
-    }
-
     return (
         <>
             <h1>DatScan Viewer / Volume Viewport</h1>
@@ -371,19 +268,9 @@ export default () => {
                 {/* <ResetButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></ResetButton> */}
                 {/* <ListSegmentation toolGroupId={toolGroupId}></ListSegmentation> */}
                 {/* <CrossHair toolGroupId={toolGroupId} vId1={viewportId1} vId2={viewportId2} vId3={viewportId3}></CrossHair> */}
-                <button onClick={getCoord}>ici</button>
+                <CoordsOnCursor renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId}></CoordsOnCursor>
             </div>
             <div id='content'>
-            </div>
-            <div id='toolbar' style={{ display: 'flex' }}>
-                <p id='canvasC1' style={{ color: 'white', marginRight: '10px' }}>Canvas : </p>
-                <p id='worldC1' style={{ color: 'white', marginRight: '20px' }}>World  : </p>
-
-                <p id='canvasC2' style={{ color: 'white', marginRight: '10px' }}>Canvas : </p>
-                <p id='worldC2' style={{ color: 'white', marginRight: '20px' }}>World  : </p>
-
-                <p id='canvasC3' style={{ color: 'white', marginRight: '10px' }}>Canvas : </p>
-                <p id='worldC3' style={{ color: 'white', marginRight: '20px' }}>World  : </p>
             </div>
         </>
     )
