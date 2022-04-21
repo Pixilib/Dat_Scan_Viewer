@@ -209,6 +209,8 @@ export default () => {
             const viewp1 = renderingEngine.getViewport(viewportId1)
             const viewp1Data = viewp1.getImageData();
             // console.log('Matrice point VP1', viewp1Data['imageData'].getPointData().getArrays()[0].getData());
+            console.log(viewp1Data['imageData'].getPointData().getArrays()[0]);
+            console.log('Matrice point VP1', viewp1Data['imageData'].getPointData().getArrays()[0].get());
 
 
             const viewp2 = renderingEngine.getViewport(viewportId2)
@@ -232,7 +234,7 @@ export default () => {
             <h1>DatScan Viewer / Volume Viewport</h1>
             <Drop set={buildImageId}></Drop>
             <div id='toolbar' style={{ marginTop: '10px', marginBottom: '5px' }}>
-                <CoordsOnCursor renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId}></CoordsOnCursor>
+                <CoordsOnCursor renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId} volumeId={volumeId}></CoordsOnCursor>
             </div>
             <div id='content'>
                 <div id='DivView' style={{ display: 'flex', flexDirection: 'row' }}>
