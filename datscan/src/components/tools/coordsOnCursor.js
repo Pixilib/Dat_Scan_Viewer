@@ -1,7 +1,6 @@
 import { getRenderingEngine } from "@cornerstonejs/core";
 import { CrosshairsTool, ToolGroupManager } from "@cornerstonejs/tools";
 import { MouseBindings } from "@cornerstonejs/tools/dist/esm/enums";
-import $ from 'jquery'
 
 export default ({ renderingEngineId, viewportId1, viewportId2, viewportId3, toolGroupId }) => {
 

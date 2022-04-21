@@ -1,22 +1,13 @@
+import React, { Component, useEffect, useState } from 'react';
 import { CONSTANTS, init, RenderingEngine, volumeLoader, Enums, metaData, setVolumesForViewports, getRenderingEngine, VolumeViewport, utilities as csCoreUti } from '@cornerstonejs/core';
 import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import initCornerstoneWADOImageLoader from './initCornerstoneWADOImageLoader'
-import React, { Component, useEffect, useState } from 'react';
-import Drop from './DropZone';
 import { cornerstoneStreamingImageVolumeLoader } from '@cornerstonejs/streaming-image-volume-loader';
 import { makeVolumeMetadata } from '@cornerstonejs/streaming-image-volume-loader/dist/esm/helpers';
-import FlipVerticalButton from './tools/FlipVerticalButton';
-import FlipHorizontalButton from './tools/FlipHorizontalButton';
-import ResetButton from './tools/ResetButton';
-import ListOrientation from './tools/ListOrientation';
 import { addTool, LengthTool, CrosshairsTool, ToolGroupManager, SegmentationDisplayTool, StackScrollMouseWheelTool, segmentation, ZoomTool, init as ToolInit, BrushTool, RectangleScissorsTool, CircleScissorsTool, SphereScissorsTool, Enums as csEnums, utilities } from '@cornerstonejs/tools';
 import { MouseBindings } from '@cornerstonejs/tools/dist/esm/enums';
-import ListSegmentation from './tools/ListSegmentation';
-import CrossHair from './tools/CrossHair';
-import setCtTransferFunctionForVolumeActor from './setCtTransferFunctionForVolumeActor';
-import $ from 'jquery'
 import CoordsOnCursor from './tools/coordsOnCursor';
-import Test from './tools/test';
+import Drop from './DropZone';
 
 export default () => {
     const [files, setFiles] = useState([]);
@@ -89,14 +80,8 @@ export default () => {
             initCornerstoneWADOImageLoader();
 
             //On ajoute les outils souhaités
-            // addTool(LengthTool);
             addTool(ZoomTool);
             addTool(StackScrollMouseWheelTool);
-            // addTool(SegmentationDisplayTool);
-            // addTool(RectangleScissorsTool);
-            // addTool(CircleScissorsTool);
-            // addTool(SphereScissorsTool);
-            // addTool(BrushTool);
             addTool(CrosshairsTool)
 
             volumeLoader.registerVolumeLoader('cornerStreamingImageVolume', cornerstoneStreamingImageVolumeLoader);
@@ -113,36 +98,13 @@ export default () => {
 
             const volumeMetadata = makeVolumeMetadata(imageIds);
 
-
-            const divContent = document.getElementById("content");
-            const divViewports = document.createElement("div");
-            divViewports.id = 'divView';
-            divViewports.style.display = 'flex';
-            divViewports.style.flexDirection = 'row';
-
-            const element1 = document.createElement('div');
-            element1.id = 'view1';
-            const element2 = document.createElement('div');
-            element2.id = 'view2';
-            const element3 = document.createElement('div');
-            element3.id = 'view3';
-
-            element1.style.width = '409px';
-            element1.style.height = '500px';
-            element2.style.width = '409px';
-            element2.style.height = '500px';
-            element3.style.width = '409px';
-            element3.style.height = '500px';
+            const element1 = document.getElementById('view1');
+            const element2 = document.getElementById('view2');
+            const element3 = document.getElementById('view3');
 
             element1.oncontextmenu = (e) => e.preventDefault();
             element2.oncontextmenu = (e) => e.preventDefault();
             element3.oncontextmenu = (e) => e.preventDefault();
-
-            divViewports.appendChild(element1);
-            divViewports.appendChild(element2);
-            divViewports.appendChild(element3);
-
-            divContent.appendChild(divViewports);
 
             const volume = await volumeLoader.createAndCacheVolume(volumeId, {
                 imageIds
@@ -204,15 +166,7 @@ export default () => {
             toolGroup.addViewport(viewportId3, renderingEngineId);
 
             // // Segmentation Tools
-            // toolGroup.addTool(SegmentationDisplayTool.toolName);
-            // toolGroup.addTool(RectangleScissorsTool.toolName);
-            // toolGroup.addTool(CircleScissorsTool.toolName);
-            // toolGroup.addTool(SphereScissorsTool.toolName);
-            // toolGroup.addTool(BrushTool.toolName);
             toolGroup.addTool(ZoomTool.toolName)
-            // toolGroup.setToolEnabled(SegmentationDisplayTool.toolName);
-
-
             toolGroup.addTool(StackScrollMouseWheelTool.toolName);
 
             //De base sur la molette
@@ -221,28 +175,13 @@ export default () => {
                 bindings: [{ mouseButton: MouseBindings.Secondary }],
             });
 
-            // await segmentation.addSegmentationRepresentations(toolGroupId, [
-            //     {
-            //         segmentationId,
-            //         type: csEnums.SegmentationRepresentations.Labelmap,
-            //     },
-            // ]);
-
             const viewp1 = renderingEngine.getViewport(viewportId1)
-            console.log("Viewport 1 : ", viewp1)
-            console.log('i 1 = ', viewp1.getRenderingEngine());
             const viewp1Data = viewp1.getImageData();
-            // console.log('ici ', viewp1Data['imageData'].getPointData().getArrays()[0]);
-            // console.log('ici ', viewp1Data['imageData'].getPointData().getArrays()[0].get());
-            // console.log(viewp1Data['imageData']);
-            // console.log(viewp1Data['imageData'].getPoint(20000));
             // console.log('Matrice point VP1', viewp1Data['imageData'].getPointData().getArrays()[0].getData());
 
 
             const viewp2 = renderingEngine.getViewport(viewportId2)
-            console.log("Viewport 2 : ", viewp2)
             const viewp2Data = viewp2.getImageData();
-            // console.log(viewp2Data['imageData'].getPoint(20000));
             // console.log('Matrice point VP2', viewp2Data['imageData'].getPointData().getArrays()[0].getData());
 
             renderingEngine.renderViewports([viewportId1, viewportId2, viewportId3]);
@@ -262,15 +201,14 @@ export default () => {
             <h1>DatScan Viewer / Volume Viewport</h1>
             <Drop set={buildImageId}></Drop>
             <div id='toolbar' style={{ marginTop: '10px', marginBottom: '5px' }}>
-                {/* <FlipVerticalButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></FlipVerticalButton> */}
-                {/* <FlipHorizontalButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></FlipHorizontalButton> */}
-                {/* <ListOrientation renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></ListOrientation> */}
-                {/* <ResetButton renderingEngineId={renderingEngineId} viewportId={viewportIdentifiant}></ResetButton> */}
-                {/* <ListSegmentation toolGroupId={toolGroupId}></ListSegmentation> */}
-                {/* <CrossHair toolGroupId={toolGroupId} vId1={viewportId1} vId2={viewportId2} vId3={viewportId3}></CrossHair> */}
                 <CoordsOnCursor renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId}></CoordsOnCursor>
             </div>
             <div id='content'>
+                <div id='DivView' style={{ display: 'flex', flexDirection: 'row' }}>
+                    <div id='view1' style={{ width: '409px', height: '500px' }}></div>
+                    <div id='view2' style={{ width: '409px', height: '500px' }}></div>
+                    <div id='view3' style={{ width: '409px', height: '500px' }}></div>
+                </div>
             </div>
         </>
     )
