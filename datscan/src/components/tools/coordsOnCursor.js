@@ -245,58 +245,8 @@ export default ({ renderingEngineId, viewportId1, viewportId2, viewportId3, tool
             }
         })
 
-        const viewportColors = {
-            [viewportId1]: 'rgb(200, 0, 0)',
-            [viewportId2]: 'rgb(200, 200, 0)',
-            [viewportId3]: 'rgb(0, 200, 0)',
-        };
-
-        const viewportReferenceLineControllable = [
-            viewportId1,
-            viewportId2,
-            viewportId3,
-        ];
-
-        const viewportReferenceLineDraggableRotatable = [
-            viewportId1,
-            viewportId2,
-            viewportId3,
-        ];
-
-        const viewportReferenceLineSlabThicknessControlsOn = [
-            viewportId1,
-            viewportId2,
-            viewportId3,
-        ];
-
-        function getReferenceLineColor(viewportId) {
-            return viewportColors[viewportId];
-        }
-
-        function getReferenceLineControllable(viewportId) {
-            const index = viewportReferenceLineControllable.indexOf(viewportId);
-            return index !== -1;
-        }
-
-        function getReferenceLineDraggableRotatable(viewportId) {
-            const index = viewportReferenceLineDraggableRotatable.indexOf(viewportId);
-            return index !== -1;
-        }
-
-        function getReferenceLineSlabThicknessControlsOn(viewportId) {
-            const index =
-                viewportReferenceLineSlabThicknessControlsOn.indexOf(viewportId);
-            return index !== -1;
-        }
-
+        //CrossHair tool
         const toolGroup = ToolGroupManager.getToolGroup(toolGroupId)
-        toolGroup.addTool(CrosshairsTool.toolName, {
-            getReferenceLineColor,
-            getReferenceLineControllable,
-            getReferenceLineDraggableRotatable,
-            getReferenceLineSlabThicknessControlsOn,
-        });
-        toolGroup.setToolEnabled(CrosshairsTool.toolName);
         toolGroup.setToolActive(CrosshairsTool.toolName, {
             bindings: [{ mouseButton: MouseBindings.Primary }]
         })

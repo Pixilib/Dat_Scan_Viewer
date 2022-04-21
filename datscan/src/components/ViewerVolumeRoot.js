@@ -20,26 +20,48 @@ export default () => {
     const viewportId3 = 'CT_CORONAL';
     const volumeId = 'cornerStreamingImageVolume: myVolume';
 
-    function getValue(volume, worldPos) {
-        const { dimensions, scalarData, imageData } = volume;
+    const viewportColors = {
+        [viewportId1]: 'rgb(200, 0, 0)',
+        [viewportId2]: 'rgb(200, 200, 0)',
+        [viewportId3]: 'rgb(0, 200, 0)',
+    };
 
-        const index = imageData.worldToIndex(worldPos);
+    const viewportReferenceLineControllable = [
+        viewportId1,
+        viewportId2,
+        viewportId3,
+    ];
 
-        index[0] = Math.floor(index[0]);
-        index[1] = Math.floor(index[1]);
-        index[2] = Math.floor(index[2]);
+    const viewportReferenceLineDraggableRotatable = [
+        viewportId1,
+        viewportId2,
+        viewportId3,
+    ];
 
-        if (!csCoreUti.indexWithinDimensions(index, dimensions)) {
-            return;
-        }
+    const viewportReferenceLineSlabThicknessControlsOn = [
+        viewportId1,
+        viewportId2,
+        viewportId3,
+    ];
 
-        const yMultiple = dimensions[0];
-        const zMultiple = dimensions[0] * dimensions[1];
+    function getReferenceLineColor(viewportId) {
+        return viewportColors[viewportId];
+    }
 
-        const value =
-            scalarData[index[2] * zMultiple + index[1] * yMultiple + index[0]];
+    function getReferenceLineControllable(viewportId) {
+        const index = viewportReferenceLineControllable.indexOf(viewportId);
+        return index !== -1;
+    }
 
-        return value;
+    function getReferenceLineDraggableRotatable(viewportId) {
+        const index = viewportReferenceLineDraggableRotatable.indexOf(viewportId);
+        return index !== -1;
+    }
+
+    function getReferenceLineSlabThicknessControlsOn(viewportId) {
+        const index =
+            viewportReferenceLineSlabThicknessControlsOn.indexOf(viewportId);
+        return index !== -1;
     }
 
     const buildImageId = (files) => {
@@ -76,13 +98,15 @@ export default () => {
         const run = async () => {
             //Configuration et initialisation des libraries
             await init();
-            await ToolInit();
-            initCornerstoneWADOImageLoader();
 
             //On ajoute les outils souhaités
             addTool(ZoomTool);
             addTool(StackScrollMouseWheelTool);
             addTool(CrosshairsTool)
+
+            await ToolInit();
+
+            initCornerstoneWADOImageLoader();
 
             volumeLoader.registerVolumeLoader('cornerStreamingImageVolume', cornerstoneStreamingImageVolumeLoader);
             let imageIds = []
@@ -165,15 +189,22 @@ export default () => {
             toolGroup.addViewport(viewportId2, renderingEngineId);
             toolGroup.addViewport(viewportId3, renderingEngineId);
 
-            // // Segmentation Tools
+            // Tools
             toolGroup.addTool(ZoomTool.toolName)
             toolGroup.addTool(StackScrollMouseWheelTool.toolName);
+            toolGroup.addTool(CrosshairsTool.toolName, {
+                getReferenceLineColor,
+                getReferenceLineControllable,
+                getReferenceLineDraggableRotatable,
+                getReferenceLineSlabThicknessControlsOn,
+            });
 
             //De base sur la molette
             toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
             toolGroup.setToolActive(ZoomTool.toolName, {
                 bindings: [{ mouseButton: MouseBindings.Secondary }],
             });
+            //The crosshairtool is set to active when the user clicks on the CrossHair button which is the component CoordsOnCursor
 
             const viewp1 = renderingEngine.getViewport(viewportId1)
             const viewp1Data = viewp1.getImageData();
