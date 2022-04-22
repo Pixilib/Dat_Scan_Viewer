@@ -97,15 +97,16 @@ export default () => {
 
         const run = async () => {
             //Configuration et initialisation des libraries
+            initCornerstoneWADOImageLoader();
             await init();
-            await ToolInit();
 
             //On ajoute les outils souhaités
             addTool(ZoomTool);
             addTool(StackScrollMouseWheelTool);
             addTool(CrosshairsTool)
 
-            initCornerstoneWADOImageLoader();
+            await ToolInit();
+
 
             volumeLoader.registerVolumeLoader('cornerStreamingImageVolume', cornerstoneStreamingImageVolumeLoader);
             let imageIds = []
