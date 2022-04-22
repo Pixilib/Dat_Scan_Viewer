@@ -1,13 +1,21 @@
 import React, { Component, useEffect, useState } from 'react';
-import { CONSTANTS, init, RenderingEngine, volumeLoader, Enums, metaData, setVolumesForViewports, getRenderingEngine, VolumeViewport, utilities as csCoreUti } from '@cornerstonejs/core';
+import { CONSTANTS, cache, init, RenderingEngine, volumeLoader, Enums, metaData, setVolumesForViewports, getRenderingEngine, VolumeViewport, utilities as csCoreUti } from '@cornerstonejs/core';
 import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import initCornerstoneWADOImageLoader from './initCornerstoneWADOImageLoader'
 import { cornerstoneStreamingImageVolumeLoader } from '@cornerstonejs/streaming-image-volume-loader';
 import { makeVolumeMetadata } from '@cornerstonejs/streaming-image-volume-loader/dist/esm/helpers';
-import { addTool, LengthTool, CrosshairsTool, ToolGroupManager, SegmentationDisplayTool, StackScrollMouseWheelTool, segmentation, ZoomTool, init as ToolInit, BrushTool, RectangleScissorsTool, CircleScissorsTool, SphereScissorsTool, Enums as csEnums, utilities } from '@cornerstonejs/tools';
+import { addTool, LengthTool, CrosshairsTool, ToolGroupManager, SegmentationDisplayTool, StackScrollMouseWheelTool, ZoomTool, init as ToolInit, BrushTool, RectangleScissorsTool, CircleScissorsTool, SphereScissorsTool, Enums as csEnums, utilities, RectangleROIThresholdTool, segmentation } from '@cornerstonejs/tools';
 import { MouseBindings } from '@cornerstonejs/tools/dist/esm/enums';
+import { getAnnotation } from '@cornerstonejs/tools/dist/esm/stateManagement/annotation/annotationState'
+import { getActiveSegmentationRepresentation } from '@cornerstonejs/tools/dist/esm/stateManagement/segmentation/activeSegmentation'
+import { getSegmentationRepresentationByUID } from '@cornerstonejs/tools/dist/esm/stateManagement/segmentation/segmentationState'
 import CoordsOnCursor from './tools/coordsOnCursor';
 import Drop from './DropZone';
+import RectangleRoiTreshold from './tools/rectangleRoiTreshold';
+import { addSegmentationRepresentations } from '@cornerstonejs/tools/dist/esm/stateManagement/segmentation';
+import $ from 'jquery'
+import { getAnnotationSelected, getAnnotationsSelectedByToolName } from '@cornerstonejs/tools/dist/esm/stateManagement/annotation/annotationSelection';
+import { thresholdVolumeByRange } from '@cornerstonejs/tools/dist/esm/utilities/segmentation';
 
 export default () => {
     const [files, setFiles] = useState([]);
@@ -19,6 +27,70 @@ export default () => {
     const viewportId2 = 'CT_SAGITTAL';
     const viewportId3 = 'CT_CORONAL';
     const volumeId = 'cornerStreamingImageVolume: myVolume';
+
+    let lowerThreshold;
+    let upperThreshold;
+    let numSlicesToProject;
+
+    let segmentationRepresentationByUID;
+
+    const onClickRender = () => {
+        const selectedAnnotationUIDs = getAnnotationsSelectedByToolName(RectangleROIThresholdTool.toolName);
+
+        if (!selectedAnnotationUIDs) {
+            throw new Error('No annotation selected ');
+        }
+        console.log(selectedAnnotationUIDs[0]);
+        const annotationUID = selectedAnnotationUIDs[0]["annotationUID"];
+        const annotation = getAnnotation(annotationUID);
+        console.log(annotation);
+
+        if (!annotation) {
+            console.log('ici');
+            return;
+        }
+
+        const { metadata } = annotation;
+        console.log(selectedAnnotationUIDs[0]["metadata"][""]);
+        // console.log(metadata.)
+        const viewport = metadata.enableElement.viewport;
+        const volumeActorInfo = viewport.getDefaultActor();
+
+        const { uid } = volumeActorInfo;
+
+        const referenceVolume = cache.getVolume(uid);
+
+        const segmentationRepresentation = getSegmentationRepresentationByUID(toolGroupId, segmentationRepresentationByUID);
+
+        const annotations = selectedAnnotationUIDs.map((annotationUID) => {
+            const annotation = getAnnotation(annotationUID);
+            return annotation;
+        });
+
+
+        thresholdVolumeByRange(annotations, [referenceVolume], segmentationRepresentation, {
+            lowerThreshold, higherThreshold: upperThreshold, numSlicesToProject, overwrite: false,
+        })
+
+    }
+
+    const onSelectedChangeSlices = () => {
+        const inputVal = $('div #inputSlices').val();
+        numSlicesToProject = inputVal;
+        const labelName = $('div #labelSlices').text('Number of slices to Segment: ' + inputVal);
+    }
+
+    const onSelectedChangeInputLowerT = () => {
+        const inputVal = $('div #inputLowerT').val();
+        lowerThreshold = inputVal;
+        const labelName = $('div #labelLowerT').text('Lower Threshold: ' + inputVal);
+    }
+
+    const onSelectedChangeInputUpperT = () => {
+        const inputVal = $('div #inputUpperT').val();
+        upperThreshold = inputVal;
+        const labelName = $('div #labelUpperT').text('Upper Threshold: ' + inputVal);
+    }
 
     const viewportColors = {
         [viewportId1]: 'rgb(200, 0, 0)',
@@ -105,7 +177,8 @@ export default () => {
             addTool(ZoomTool);
             addTool(StackScrollMouseWheelTool);
             addTool(CrosshairsTool)
-
+            addTool(SegmentationDisplayTool)
+            addTool(RectangleROIThresholdTool)
 
             volumeLoader.registerVolumeLoader('cornerStreamingImageVolume', cornerstoneStreamingImageVolumeLoader);
             let imageIds = []
@@ -132,6 +205,8 @@ export default () => {
             const volume = await volumeLoader.createAndCacheVolume(volumeId, {
                 imageIds
             });
+
+            await addSegmentationsToState();
 
             const renderingEngine = new RenderingEngine(renderingEngineId)
 
@@ -165,8 +240,6 @@ export default () => {
 
             renderingEngine.setViewports(viewportInput);
 
-            await addSegmentationsToState();
-
             volume.load();
 
             await setVolumesForViewports(renderingEngine, [
@@ -191,6 +264,8 @@ export default () => {
             // Tools
             toolGroup.addTool(ZoomTool.toolName)
             toolGroup.addTool(StackScrollMouseWheelTool.toolName);
+            toolGroup.addTool(SegmentationDisplayTool.toolName);
+            toolGroup.addTool(RectangleROIThresholdTool.toolName);
             toolGroup.addTool(CrosshairsTool.toolName, {
                 getReferenceLineColor,
                 getReferenceLineControllable,
@@ -198,12 +273,28 @@ export default () => {
                 getReferenceLineSlabThicknessControlsOn,
             });
 
+            toolGroup.setToolEnabled(SegmentationDisplayTool.toolName);
+
             //De base sur la molette
             toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
+            toolGroup.setToolActive(RectangleROIThresholdTool.toolName, {
+                bindings: [{ mouseButton: MouseBindings.Primary }],
+            });
             toolGroup.setToolActive(ZoomTool.toolName, {
                 bindings: [{ mouseButton: MouseBindings.Secondary }],
             });
             //The crosshairtool is set to active when the user clicks on the CrossHair button which is the component CoordsOnCursor
+
+            // // Add the segmentation representation to the toolgroup
+            const segmentationRepresentationByUIDs =
+                await addSegmentationRepresentations(toolGroupId, [
+                    {
+                        segmentationId,
+                        type: csEnums.SegmentationRepresentations.Labelmap,
+                    },
+                ]);
+
+            segmentationRepresentationByUID = segmentationRepresentationByUIDs[0];
 
             const viewp1 = renderingEngine.getViewport(viewportId1)
             const viewp1Data = viewp1.getImageData();
@@ -233,6 +324,7 @@ export default () => {
             <h1>DatScan Viewer / Volume Viewport</h1>
             <Drop set={buildImageId}></Drop>
             <div id='toolbar' style={{ marginTop: '10px', marginBottom: '5px' }}>
+                {/* <RectangleRoiTreshold toolgroupId={toolGroupId}></RectangleRoiTreshold> */}
                 <CoordsOnCursor renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId} volumeId={volumeId}></CoordsOnCursor>
             </div>
             <div id='content'>
@@ -241,6 +333,17 @@ export default () => {
                     <div id='view2' style={{ width: '409px', height: '500px' }}></div>
                     <div id='view3' style={{ width: '409px', height: '500px' }}></div>
                 </div>
+            </div>
+            <div style={{ color: 'white' }}>
+                <button onClick={onClickRender}>Execute threshold</button>
+                <label id="labelSlices">Number of slices to Segment: 3</label>
+                <input id='inputSlices' type='range' min='1' max='5' defaultValue='3' onChange={onSelectedChangeSlices}></input>
+
+                <label id="labelLowerT">Lower Threshold: 100</label>
+                <input id='inputLowerT' type='range' min='100' max='400' defaultValue='100' onChange={onSelectedChangeInputLowerT}></input>
+
+                <label id="labelUpperT">Upper Threshold: 500</label>
+                <input id='inputUpperT' type='range' min='500' max='1000' defaultValue='500' onChange={onSelectedChangeInputUpperT}></input>
             </div>
         </>
     )
