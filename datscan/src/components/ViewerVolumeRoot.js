@@ -277,9 +277,9 @@ export default () => {
 
             //De base sur la molette
             toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
-            toolGroup.setToolActive(RectangleROIThresholdTool.toolName, {
-                bindings: [{ mouseButton: MouseBindings.Primary }],
-            });
+            // toolGroup.setToolActive(RectangleROIThresholdTool.toolName, {
+            //     bindings: [{ mouseButton: MouseBindings.Primary }],
+            // });
             toolGroup.setToolActive(ZoomTool.toolName, {
                 bindings: [{ mouseButton: MouseBindings.Secondary }],
             });
@@ -334,7 +334,7 @@ export default () => {
                     <div id='view3' style={{ width: '409px', height: '500px' }}></div>
                 </div>
             </div>
-            <div style={{ color: 'white' }}>
+            {/* <div style={{ color: 'white' }}>
                 <button onClick={onClickRender}>Execute threshold</button>
                 <label id="labelSlices">Number of slices to Segment: 3</label>
                 <input id='inputSlices' type='range' min='1' max='5' defaultValue='3' onChange={onSelectedChangeSlices}></input>
@@ -344,7 +344,7 @@ export default () => {
 
                 <label id="labelUpperT">Upper Threshold: 500</label>
                 <input id='inputUpperT' type='range' min='500' max='1000' defaultValue='500' onChange={onSelectedChangeInputUpperT}></input>
-            </div>
+            </div> */}
         </>
     )
 }
