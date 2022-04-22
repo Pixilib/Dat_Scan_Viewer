@@ -99,13 +99,12 @@ export default () => {
             //Configuration et initialisation des libraries
             initCornerstoneWADOImageLoader();
             await init();
+            await ToolInit();
 
             //On ajoute les outils souhaités
             addTool(ZoomTool);
             addTool(StackScrollMouseWheelTool);
             addTool(CrosshairsTool)
-
-            await ToolInit();
 
 
             volumeLoader.registerVolumeLoader('cornerStreamingImageVolume', cornerstoneStreamingImageVolumeLoader);
