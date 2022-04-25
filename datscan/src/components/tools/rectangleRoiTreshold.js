@@ -1,43 +1,85 @@
-import { cache, RenderingEngine } from '@cornerstonejs/core'
+import { cache, getRenderingEngine, RenderingEngine } from '@cornerstonejs/core'
 import { RectangleROIThresholdTool, utilities } from '@cornerstonejs/tools'
+import { getAnnotationsSelectedByToolName } from '@cornerstonejs/tools/dist/esm/stateManagement/annotation/annotationSelection'
 import { getAnnotation } from '@cornerstonejs/tools/dist/esm/stateManagement/annotation/annotationState'
-import { getActiveSegmentationRepresentation } from '@cornerstonejs/tools/dist/esm/stateManagement/segmentation/activeSegmentation'
 import { getSegmentationRepresentationByUID } from '@cornerstonejs/tools/dist/esm/stateManagement/segmentation/segmentationState'
+import { thresholdVolumeByRange } from '@cornerstonejs/tools/dist/esm/utilities/segmentation'
 import $ from 'jquery'
 
 
-export default ({ toolgroupId }) => {
-    let segmentationRepresentationByUID;
+export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, viewportId3, segUID }) => {
     let lowerThreshold;
     let upperThreshold;
     let numSlicesToProject;
 
+    let viewPID;
+    let elementView1;
+    let elementView2;
+    let elementView3;
+
+    let segmentationRepresentationByUID;
+    const toolGid = toolGroupId;
+
+    const onClickInit = async () => {
+
+        elementView1 = document.getElementById('view1');
+        elementView2 = document.getElementById('view2');
+        elementView3 = document.getElementById('view3');
+
+        elementView1.addEventListener('mousedown', () => {
+            viewPID = viewportId1;
+        })
+
+        elementView2.addEventListener('mousedown', () => {
+            viewPID = viewportId2;
+        })
+
+        elementView3.addEventListener('mousedown', () => {
+            viewPID = viewportId3;
+        })
+        document.getElementById('tool').style = "visibility: 'visible'";
+        document.getElementById('buttonTool').hidden = true;
+    }
+
     const onClickRender = () => {
-        const selectedAnnotationUIDs = getActiveSegmentationRepresentation(RectangleROIThresholdTool.toolName);
+        let viewP;
+        const renderingEngine = getRenderingEngine(renderingEngineId)
+        viewP = renderingEngine.getViewport(viewPID);
+        console.log(viewPID)
+
+        const selectedAnnotationUIDs = getAnnotationsSelectedByToolName(RectangleROIThresholdTool.toolName);
 
         if (!selectedAnnotationUIDs) {
             throw new Error('No annotation selected ');
         }
-
-        const annotationUID = selectedAnnotationUIDs[0];
+        console.log(selectedAnnotationUIDs);
+        const annotationUID = selectedAnnotationUIDs[0]["annotationUID"];
         const annotation = getAnnotation(annotationUID);
 
         if (!annotation) {
+            console.log('ici');
             return;
         }
-        const viewport = annotation.enableElement.viewport;
+        console.log(viewP)
+        const viewport = viewP;
         const volumeActorInfo = viewport.getDefaultActor();
 
-        const referenceVolume = cache.getVolume(volumeActorInfo);
+        const { uid } = volumeActorInfo;
 
-        const segmentationRepresentation = getSegmentationRepresentationByUID(toolgroupId, segmentationRepresentationByUID);
+        const referenceVolume = cache.getVolume(uid);
 
-        const annotations = selectedAnnotationUIDs.map((annotationUID) => {
-            const annotation = getAnnotation(annotationUID);
-            return annotation;
-        });
+        console.log(segUID)
+        const segmentationRepresentation = getSegmentationRepresentationByUID(toolGroupId, segUID);
 
-        utilities.segmentation.thresholdVolumeByRange(annotations, [referenceVolume], segmentationRepresentation, {
+        console.log(segmentationRepresentation)
+        // const annotations = selectedAnnotationUIDs.map((annotationUID) => {
+        //     const annotation = getAnnotation(annotationUID);
+        //     return annotation;
+        // });
+
+        console.log(toolGroupId)
+
+        thresholdVolumeByRange([annotation], [referenceVolume], segmentationRepresentation, {
             lowerThreshold, higherThreshold: upperThreshold, numSlicesToProject, overwrite: false,
         })
 
@@ -63,8 +105,9 @@ export default ({ toolgroupId }) => {
 
 
     return (<>
-        <div style={{ color: 'white' }}>
-            <button>Execute threshold</button>
+        <button id='buttonTool' onClick={onClickInit}>RectangleRoiTreshold</button>
+        <div id='tool' style={{ color: 'white', visibility: 'hidden' }}>
+            <button onClick={onClickRender}>Execute threshold</button>
             <label id="labelSlices">Number of slices to Segment: 3</label>
             <input id='inputSlices' type='range' min='1' max='5' defaultValue='3' onChange={onSelectedChangeSlices}></input>
 

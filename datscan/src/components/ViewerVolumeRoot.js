@@ -13,7 +13,7 @@ import CoordsOnCursor from './tools/coordsOnCursor';
 import Drop from './DropZone';
 import RectangleRoiTreshold from './tools/rectangleRoiTreshold';
 import { addSegmentationRepresentations } from '@cornerstonejs/tools/dist/esm/stateManagement/segmentation';
-import $ from 'jquery'
+import $, { get } from 'jquery'
 import { getAnnotationSelected, getAnnotationsSelectedByToolName } from '@cornerstonejs/tools/dist/esm/stateManagement/annotation/annotationSelection';
 import { thresholdVolumeByRange } from '@cornerstonejs/tools/dist/esm/utilities/segmentation';
 
@@ -28,70 +28,7 @@ export default () => {
     const viewportId3 = 'CT_CORONAL';
     const volumeId = 'cornerStreamingImageVolume: myVolume';
 
-    let lowerThreshold;
-    let upperThreshold;
-    let numSlicesToProject;
-
     let segmentationRepresentationByUID;
-
-    const onClickRender = () => {
-        const selectedAnnotationUIDs = getAnnotationsSelectedByToolName(RectangleROIThresholdTool.toolName);
-
-        if (!selectedAnnotationUIDs) {
-            throw new Error('No annotation selected ');
-        }
-        console.log(selectedAnnotationUIDs[0]);
-        const annotationUID = selectedAnnotationUIDs[0]["annotationUID"];
-        const annotation = getAnnotation(annotationUID);
-        console.log(annotation);
-
-        if (!annotation) {
-            console.log('ici');
-            return;
-        }
-
-        const { metadata } = annotation;
-        console.log(selectedAnnotationUIDs[0]["metadata"][""]);
-        // console.log(metadata.)
-        const viewport = metadata.enableElement.viewport;
-        const volumeActorInfo = viewport.getDefaultActor();
-
-        const { uid } = volumeActorInfo;
-
-        const referenceVolume = cache.getVolume(uid);
-
-        const segmentationRepresentation = getSegmentationRepresentationByUID(toolGroupId, segmentationRepresentationByUID);
-
-        const annotations = selectedAnnotationUIDs.map((annotationUID) => {
-            const annotation = getAnnotation(annotationUID);
-            return annotation;
-        });
-
-
-        thresholdVolumeByRange(annotations, [referenceVolume], segmentationRepresentation, {
-            lowerThreshold, higherThreshold: upperThreshold, numSlicesToProject, overwrite: false,
-        })
-
-    }
-
-    const onSelectedChangeSlices = () => {
-        const inputVal = $('div #inputSlices').val();
-        numSlicesToProject = inputVal;
-        const labelName = $('div #labelSlices').text('Number of slices to Segment: ' + inputVal);
-    }
-
-    const onSelectedChangeInputLowerT = () => {
-        const inputVal = $('div #inputLowerT').val();
-        lowerThreshold = inputVal;
-        const labelName = $('div #labelLowerT').text('Lower Threshold: ' + inputVal);
-    }
-
-    const onSelectedChangeInputUpperT = () => {
-        const inputVal = $('div #inputUpperT').val();
-        upperThreshold = inputVal;
-        const labelName = $('div #labelUpperT').text('Upper Threshold: ' + inputVal);
-    }
-
     const viewportColors = {
         [viewportId1]: 'rgb(200, 0, 0)',
         [viewportId2]: 'rgb(200, 200, 0)',
@@ -285,7 +222,7 @@ export default () => {
             });
             //The crosshairtool is set to active when the user clicks on the CrossHair button which is the component CoordsOnCursor
 
-            // // Add the segmentation representation to the toolgroup
+            // Add the segmentation representation to the toolgroup
             const segmentationRepresentationByUIDs =
                 await addSegmentationRepresentations(toolGroupId, [
                     {
@@ -295,6 +232,7 @@ export default () => {
                 ]);
 
             segmentationRepresentationByUID = segmentationRepresentationByUIDs[0];
+            console.log(segmentationRepresentationByUID);
 
             const viewp1 = renderingEngine.getViewport(viewportId1)
             const viewp1Data = viewp1.getImageData();
@@ -308,11 +246,10 @@ export default () => {
             // console.log('Matrice point VP2', viewp2Data['imageData'].getPointData().getArrays()[0].getData());
 
             renderingEngine.renderViewports([viewportId1, viewportId2, viewportId3]);
-
         }
         if (files.length > 0) {
             document.getElementById('toolbar').hidden = false
-            run()
+            run();
         } else {
             document.getElementById('toolbar').hidden = true
         }
@@ -324,7 +261,7 @@ export default () => {
             <h1>DatScan Viewer / Volume Viewport</h1>
             <Drop set={buildImageId}></Drop>
             <div id='toolbar' style={{ marginTop: '10px', marginBottom: '5px' }}>
-                {/* <RectangleRoiTreshold toolgroupId={toolGroupId}></RectangleRoiTreshold> */}
+                {/* <RectangleRoiTreshold renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId} segUID={segmentationRepresentationByUID}></RectangleRoiTreshold> */}
                 <CoordsOnCursor renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId} volumeId={volumeId}></CoordsOnCursor>
             </div>
             <div id='content'>
@@ -334,17 +271,7 @@ export default () => {
                     <div id='view3' style={{ width: '409px', height: '500px' }}></div>
                 </div>
             </div>
-            {/* <div style={{ color: 'white' }}>
-                <button onClick={onClickRender}>Execute threshold</button>
-                <label id="labelSlices">Number of slices to Segment: 3</label>
-                <input id='inputSlices' type='range' min='1' max='5' defaultValue='3' onChange={onSelectedChangeSlices}></input>
 
-                <label id="labelLowerT">Lower Threshold: 100</label>
-                <input id='inputLowerT' type='range' min='100' max='400' defaultValue='100' onChange={onSelectedChangeInputLowerT}></input>
-
-                <label id="labelUpperT">Upper Threshold: 500</label>
-                <input id='inputUpperT' type='range' min='500' max='1000' defaultValue='500' onChange={onSelectedChangeInputUpperT}></input>
-            </div> */}
         </>
     )
 }
