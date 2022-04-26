@@ -27,6 +27,7 @@ export default ({ renderingEngineId, viewportId1, viewportId2, viewportId3, tool
     }
 
     const getCoord = () => {
+        document.getElementById('CrossHairUI').style = "visibility: 'visible'";
         let viewPCenter = [];
         const elementView1 = document.getElementById('view1');
         const elementView2 = document.getElementById('view2');
@@ -288,6 +289,13 @@ export default ({ renderingEngineId, viewportId1, viewportId2, viewportId3, tool
 
         //CrossHair tool
         const toolGroup = ToolGroupManager.getToolGroup(toolGroupId)
+        const activeTool = toolGroup.getActivePrimaryMouseButtonTool();
+        if (activeTool != null) {
+            toolGroup.setToolDisabled(activeTool);
+            document.getElementById('RectangleROItooldiv').hidden = true;
+            document.getElementById('RectangleROIbuttonTool').hidden = false;
+            document.getElementById('CrossHairUI').hidden = false;
+        }
         toolGroup.setToolActive(CrosshairsTool.toolName, {
             bindings: [{ mouseButton: MouseBindings.Primary }]
         })
@@ -298,7 +306,7 @@ export default ({ renderingEngineId, viewportId1, viewportId2, viewportId3, tool
     return (
         <>
             <button id="crosshair-button" onClick={getCoord}>CrossHair</button>
-            <div id="CrossHairUI">
+            <div id="CrossHairUI" style={{ visibility: 'hidden' }}>
                 <div style={{ display: 'flex' }}>
                     <div style={{ display: 'flex', color: 'white', marginRight: '30px', borderWidth: 2, borderColor: 'red', borderStyle: 'solid' }}>
                         <p id='canvasC1' style={{ marginRight: '10px' }}>Canvas : </p>

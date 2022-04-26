@@ -5,17 +5,10 @@ import initCornerstoneWADOImageLoader from './initCornerstoneWADOImageLoader'
 import { cornerstoneStreamingImageVolumeLoader } from '@cornerstonejs/streaming-image-volume-loader';
 import { makeVolumeMetadata } from '@cornerstonejs/streaming-image-volume-loader/dist/esm/helpers';
 import { addTool, LengthTool, CrosshairsTool, ToolGroupManager, SegmentationDisplayTool, StackScrollMouseWheelTool, ZoomTool, init as ToolInit, BrushTool, RectangleScissorsTool, CircleScissorsTool, SphereScissorsTool, Enums as csEnums, utilities, RectangleROIThresholdTool, segmentation } from '@cornerstonejs/tools';
-import { MouseBindings } from '@cornerstonejs/tools/dist/esm/enums';
-import { getAnnotation } from '@cornerstonejs/tools/dist/esm/stateManagement/annotation/annotationState'
-import { getActiveSegmentationRepresentation } from '@cornerstonejs/tools/dist/esm/stateManagement/segmentation/activeSegmentation'
-import { getSegmentationRepresentationByUID } from '@cornerstonejs/tools/dist/esm/stateManagement/segmentation/segmentationState'
 import CoordsOnCursor from './tools/coordsOnCursor';
 import Drop from './DropZone';
 import RectangleRoiTreshold from './tools/rectangleRoiTreshold';
-import { addSegmentationRepresentations } from '@cornerstonejs/tools/dist/esm/stateManagement/segmentation';
-import $, { get } from 'jquery'
-import { getAnnotationSelected, getAnnotationsSelectedByToolName } from '@cornerstonejs/tools/dist/esm/stateManagement/annotation/annotationSelection';
-import { thresholdVolumeByRange } from '@cornerstonejs/tools/dist/esm/utilities/segmentation';
+
 
 export default () => {
     const [files, setFiles] = useState([]);
@@ -28,7 +21,6 @@ export default () => {
     const viewportId3 = 'CT_CORONAL';
     const volumeId = 'cornerStreamingImageVolume: myVolume';
 
-    let segmentationRepresentationByUID;
     const viewportColors = {
         [viewportId1]: 'rgb(200, 0, 0)',
         [viewportId2]: 'rgb(200, 200, 0)',
@@ -214,25 +206,10 @@ export default () => {
 
             //De base sur la molette
             toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
-            // toolGroup.setToolActive(RectangleROIThresholdTool.toolName, {
-            //     bindings: [{ mouseButton: MouseBindings.Primary }],
-            // });
             toolGroup.setToolActive(ZoomTool.toolName, {
-                bindings: [{ mouseButton: MouseBindings.Secondary }],
+                bindings: [{ mouseButton: csEnums.MouseBindings.Secondary }],
             });
             //The crosshairtool is set to active when the user clicks on the CrossHair button which is the component CoordsOnCursor
-
-            // Add the segmentation representation to the toolgroup
-            const segmentationRepresentationByUIDs =
-                await addSegmentationRepresentations(toolGroupId, [
-                    {
-                        segmentationId,
-                        type: csEnums.SegmentationRepresentations.Labelmap,
-                    },
-                ]);
-
-            segmentationRepresentationByUID = segmentationRepresentationByUIDs[0];
-            console.log(segmentationRepresentationByUID);
 
             const viewp1 = renderingEngine.getViewport(viewportId1)
             const viewp1Data = viewp1.getImageData();
@@ -261,7 +238,7 @@ export default () => {
             <h1>DatScan Viewer / Volume Viewport</h1>
             <Drop set={buildImageId}></Drop>
             <div id='toolbar' style={{ marginTop: '10px', marginBottom: '5px' }}>
-                {/* <RectangleRoiTreshold renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId} segUID={segmentationRepresentationByUID}></RectangleRoiTreshold> */}
+                <RectangleRoiTreshold renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId}></RectangleRoiTreshold>
                 <CoordsOnCursor renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId} volumeId={volumeId}></CoordsOnCursor>
             </div>
             <div id='content'>
