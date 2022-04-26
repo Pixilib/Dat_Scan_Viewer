@@ -1,6 +1,5 @@
 import { getRenderingEngine, utilities as csUtils, VolumeViewport, cache } from "@cornerstonejs/core";
-import { CrosshairsTool, ToolGroupManager } from "@cornerstonejs/tools";
-import { MouseBindings } from "@cornerstonejs/tools/dist/esm/enums";
+import { CrosshairsTool, ToolGroupManager, Enums as CsToolEnums } from "@cornerstonejs/tools";
 
 export default ({ renderingEngineId, viewportId1, viewportId2, viewportId3, toolGroupId, volumeId }) => {
 
@@ -297,7 +296,7 @@ export default ({ renderingEngineId, viewportId1, viewportId2, viewportId3, tool
             document.getElementById('CrossHairUI').hidden = false;
         }
         toolGroup.setToolActive(CrosshairsTool.toolName, {
-            bindings: [{ mouseButton: MouseBindings.Primary }]
+            bindings: [{ mouseButton: CsToolEnums.MouseBindings.Primary }]
         })
 
         console.log(toolGroup.getToolInstance(CrosshairsTool.toolName));
