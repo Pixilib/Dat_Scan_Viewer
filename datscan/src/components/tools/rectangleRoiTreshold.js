@@ -15,7 +15,7 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
 
     let segmentationRepresentationByUID;
 
-    const onClickInit = async () => {
+    const onClickInit = () => {
 
         elementView1 = document.getElementById('view1');
         elementView2 = document.getElementById('view2');
