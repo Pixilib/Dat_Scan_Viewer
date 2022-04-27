@@ -135,6 +135,8 @@ export default () => {
                 imageIds
             });
 
+            console.log(volume)
+
             await addSegmentationsToState();
 
             const renderingEngine = new RenderingEngine(renderingEngineId)

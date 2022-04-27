@@ -65,8 +65,6 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
         const annotationUID = selectedAnnotationUIDs[0]["annotationUID"];
         const annotation = Anno.state.getAnnotation(annotationUID);
 
-        console.log('4 coins :', annotation.data.handles.points);
-
         if (!annotation) {
             console.log('ici');
             return;
@@ -74,6 +72,10 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
         console.log(viewP)
         const viewport = viewP;
         const volumeActorInfo = viewport.getDefaultActor();
+        const volume = cache.getVolume(volumeActorInfo.uid);
+
+        console.log('4 coins :', annotation.data.handles.points);
+        console.log(volume.spacing)
 
         const { uid } = volumeActorInfo;
 
@@ -94,9 +96,50 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
 
         const segmentationRepresentation = segmentation.state.getSegmentationRepresentationByUID(toolGroupId, segmentationRepresentationByUID);
 
-        CsToolsUtils.segmentation.thresholdVolumeByRange([annotation], [referenceVolume], segmentationRepresentation, {
+        const img = CsToolsUtils.segmentation.thresholdVolumeByRange([annotation], [referenceVolume], segmentationRepresentation, {
             lowerThreshold, higherThreshold: upperThreshold, numSlicesToProject, overwrite: false,
         })
+
+        console.log('selection :', segmentationRepresentation);
+
+        let PointMatrix = [];
+        const corners = annotation.data.handles.points;
+
+        const spacingX = volume.spacing[1]
+        const z = corners[0][0];
+        const pointHightLeftX = corners[0][1];
+        const pointHightRightX = corners[1][1];
+        const pointBottomLeftX = corners[2][1];
+        const pointBottomRightX = corners[3][1];
+
+        const spacingY = volume.spacing[2]
+        const pointHightLeftY = corners[0][2];
+        const pointHightRighY = corners[1][2];
+        const pointBottomLeftY = corners[2][2];
+        const pointBottomRightY = corners[3][2];
+
+        // for (let i = pointHightLeftY; i > pointBottomLeftY; i - spacingY) {
+        //     console.log('i :', i)
+        //     for (let j = pointBottomLeftX; j < pointBottomRightX; j + spacingX) {
+        //         console.log('j :', j)
+        //         PointMatrix.push([z, j, i]);
+        //     }
+        // }
+
+        //Bad method but working (I think)
+        //     let i = pointHightLeftY;
+        //     let j = pointBottomLeftX;
+        //     while (i > pointBottomLeftY) {
+        //         while (j < pointBottomRightX) {
+        //             PointMatrix.push([z, i, j]);
+        //             j = j + spacingX;
+        //             console.log('j :', j)
+        //         }
+        //         j = pointBottomLeftX;
+        //         i = i - spacingY;
+        //         console.log('i :', i);
+        //     }
+        //     console.log(PointMatrix);
 
     }
 
