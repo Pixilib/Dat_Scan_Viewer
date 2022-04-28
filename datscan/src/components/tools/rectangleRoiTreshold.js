@@ -95,12 +95,23 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
         const referenceVolume = cache.getVolume(uid);
 
         const segmentationRepresentation = segmentation.state.getSegmentationRepresentationByUID(toolGroupId, segmentationRepresentationByUID);
+        console.log(segmentationRepresentation.type)
 
         const img = CsToolsUtils.segmentation.thresholdVolumeByRange([annotation], [referenceVolume], segmentationRepresentation, {
             lowerThreshold, higherThreshold: upperThreshold, numSlicesToProject, overwrite: false,
         })
 
-        console.log('selection :', segmentationRepresentation);
+        console.log('Volume segmentation :', img);
+        console.log('Volume segmentation :', img.scalarData);
+        console.log('--------------------------------------')
+        console.log('Volume image de base', volume)
+        console.log('Volume image de base ', volume.scalarData)
+
+        // console.log('selection :', segmentationRepresentation);
+        // console.log('actors :', viewP._actors.get(segmentationRepresentationByUID));
+        // const actor = viewP._actors.get(segmentationRepresentationByUID);
+        // console.log(actor.volumeActor.get().mapper.get());
+        // console.log(actor.volumeActor.getVolumes().getBounds());
 
         let PointMatrix = [];
         const corners = annotation.data.handles.points;

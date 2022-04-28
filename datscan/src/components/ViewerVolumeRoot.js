@@ -137,8 +137,6 @@ export default () => {
 
             console.log(volume)
 
-            await addSegmentationsToState();
-
             const renderingEngine = new RenderingEngine(renderingEngineId)
 
             const viewportInput = [{
@@ -173,6 +171,8 @@ export default () => {
 
             volume.load();
 
+            await addSegmentationsToState();
+
             await setVolumesForViewports(renderingEngine, [
                 {
                     volumeId,
@@ -205,6 +205,7 @@ export default () => {
             });
 
             toolGroup.setToolEnabled(SegmentationDisplayTool.toolName);
+            // toolGroup.setToolEnabled(CrosshairsTool.toolName);
 
             //De base sur la molette
             toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
