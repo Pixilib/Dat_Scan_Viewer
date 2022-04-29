@@ -54,13 +54,13 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
         let viewP;
         const renderingEngine = getRenderingEngine(renderingEngineId)
         viewP = renderingEngine.getViewport(viewPID);
-        console.log(viewPID)
 
         const selectedAnnotationUIDs = Anno.selection.getAnnotationsSelectedByToolName(RectangleROIThresholdTool.toolName);
 
         if (!selectedAnnotationUIDs) {
             throw new Error('No annotation selected ');
         }
+
         console.log(selectedAnnotationUIDs);
         const annotationUID = selectedAnnotationUIDs[0]["annotationUID"];
         const annotation = Anno.state.getAnnotation(annotationUID);
@@ -69,13 +69,13 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
             console.log('ici');
             return;
         }
-        console.log(viewP)
+
         const viewport = viewP;
         const volumeActorInfo = viewport.getDefaultActor();
         const volume = cache.getVolume(volumeActorInfo.uid);
 
         console.log('4 coins :', annotation.data.handles.points);
-        console.log(volume.spacing)
+        // console.log(volume.spacing)
 
         const { uid } = volumeActorInfo;
 
@@ -101,19 +101,26 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
             lowerThreshold, higherThreshold: upperThreshold, numSlicesToProject, overwrite: false,
         })
 
-        console.log('Volume segmentation :', img);
+        console.log('Segmentation config :', segmentation.state.getSegmentation(segmentationId))
+
+        // console.log('Volume segmentation :', img);
         console.log('Volume segmentation :', img.scalarData);
-        console.log('--------------------------------------')
-        console.log('Volume image de base', volume)
+        const segScalar = Array.prototype.slice.call(img.scalarData);
+        console.log(typeof segScalar)
+        const result = segScalar.flat().reduce((a, b) => a + b);
+        console.log(result);
+        // console.log('Volume segmentation :', img.imageData.getBounds());
+        // console.log('--------------------------------------')
+        // console.log('Volume image de base', volume)
         console.log('Volume image de base ', volume.scalarData)
 
-        // console.log('selection :', segmentationRepresentation);
+        console.log('selection :', segmentationRepresentation);
         // console.log('actors :', viewP._actors.get(segmentationRepresentationByUID));
         // const actor = viewP._actors.get(segmentationRepresentationByUID);
         // console.log(actor.volumeActor.get().mapper.get());
         // console.log(actor.volumeActor.getVolumes().getBounds());
 
-        let PointMatrix = [];
+        // let PointMatrix = [];
         const corners = annotation.data.handles.points;
 
         const spacingX = volume.spacing[1]
@@ -137,20 +144,18 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
         //     }
         // }
 
-        //Bad method but working (I think)
-        //     let i = pointHightLeftY;
-        //     let j = pointBottomLeftX;
-        //     while (i > pointBottomLeftY) {
-        //         while (j < pointBottomRightX) {
-        //             PointMatrix.push([z, i, j]);
-        //             j = j + spacingX;
-        //             console.log('j :', j)
-        //         }
-        //         j = pointBottomLeftX;
-        //         i = i - spacingY;
-        //         console.log('i :', i);
+        // Bad method but working(I think)
+        // let i = pointHightLeftY;
+        // let j = pointBottomLeftX;
+        // while (i > pointBottomLeftY) {
+        //     while (j < pointBottomRightX) {
+        //         PointMatrix.push([z, i, j]);
+        //         j = j + spacingX;
         //     }
-        //     console.log(PointMatrix);
+        //     j = pointBottomLeftX;
+        //     i = i - spacingY;
+        // }
+        // console.log(PointMatrix);
 
     }
 
@@ -182,10 +187,10 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
                 <input id='inputSlices' type='range' min='1' max='5' defaultValue='3' onChange={onSelectedChangeSlices}></input>
 
                 <label id="labelLowerT">Lower Threshold: 100</label>
-                <input id='inputLowerT' type='range' min='100' max='400' defaultValue='100' onChange={onSelectedChangeInputLowerT}></input>
+                <input id='inputLowerT' type='range' min='-1024' max='400' defaultValue='100' onChange={onSelectedChangeInputLowerT}></input>
 
                 <label id="labelUpperT">Upper Threshold: 500</label>
-                <input id='inputUpperT' type='range' min='500' max='1000' defaultValue='500' onChange={onSelectedChangeInputUpperT}></input></div>
+                <input id='inputUpperT' type='range' min='500' max='1024' defaultValue='500' onChange={onSelectedChangeInputUpperT}></input></div>
         </div>
 
     </>)
