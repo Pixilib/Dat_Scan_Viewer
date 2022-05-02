@@ -4,7 +4,7 @@ import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import initCornerstoneWADOImageLoader from './initCornerstoneWADOImageLoader'
 import { cornerstoneStreamingImageVolumeLoader } from '@cornerstonejs/streaming-image-volume-loader';
 import { makeVolumeMetadata } from '@cornerstonejs/streaming-image-volume-loader/dist/esm/helpers';
-import { addTool, LengthTool, CrosshairsTool, ToolGroupManager, SegmentationDisplayTool, StackScrollMouseWheelTool, ZoomTool, init as ToolInit, BrushTool, RectangleScissorsTool, CircleScissorsTool, SphereScissorsTool, Enums as csEnums, utilities, RectangleROIThresholdTool, segmentation } from '@cornerstonejs/tools';
+import { addTool, LengthTool, CrosshairsTool, ToolGroupManager, SegmentationDisplayTool, StackScrollMouseWheelTool, ZoomTool, init as ToolInit, BrushTool, RectangleScissorsTool, CircleScissorsTool, SphereScissorsTool, Enums as csEnums, utilities, RectangleROIThresholdTool, segmentation, EllipticalROITool } from '@cornerstonejs/tools';
 import CoordsOnCursor from './tools/coordsOnCursor';
 import Drop from './DropZone';
 import RectangleRoiTreshold from './tools/rectangleRoiTreshold';
@@ -105,9 +105,11 @@ export default () => {
             //On ajoute les outils souhaités
             addTool(ZoomTool);
             addTool(StackScrollMouseWheelTool);
-            addTool(CrosshairsTool)
-            addTool(SegmentationDisplayTool)
-            addTool(RectangleROIThresholdTool)
+            addTool(CrosshairsTool);
+            addTool(SegmentationDisplayTool);
+            addTool(RectangleROIThresholdTool);
+            addTool(EllipticalROITool);
+            addTool(CircleScissorsTool);
 
             volumeLoader.registerVolumeLoader('cornerStreamingImageVolume', cornerstoneStreamingImageVolumeLoader);
             let imageIds = []
@@ -197,6 +199,8 @@ export default () => {
             toolGroup.addTool(StackScrollMouseWheelTool.toolName);
             toolGroup.addTool(SegmentationDisplayTool.toolName);
             toolGroup.addTool(RectangleROIThresholdTool.toolName);
+            toolGroup.addTool(EllipticalROITool.toolName);
+            toolGroup.addTool(CircleScissorsTool.toolName);
             toolGroup.addTool(CrosshairsTool.toolName, {
                 getReferenceLineColor,
                 getReferenceLineControllable,
@@ -209,9 +213,9 @@ export default () => {
 
             //De base sur la molette
             toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
-            toolGroup.setToolActive(ZoomTool.toolName, {
-                bindings: [{ mouseButton: csEnums.MouseBindings.Secondary }],
-            });
+            // toolGroup.setToolActive(ZoomTool.toolName, {
+            //     bindings: [{ mouseButton: csEnums.MouseBindings.Secondary }],
+            // });
             //The crosshairtool is set to active when the user clicks on the CrossHair button which is the component CoordsOnCursor
 
             const viewp1 = renderingEngine.getViewport(viewportId1)
@@ -224,6 +228,13 @@ export default () => {
             const viewp2 = renderingEngine.getViewport(viewportId2)
             const viewp2Data = viewp2.getImageData();
             // console.log('Matrice point VP2', viewp2Data['imageData'].getPointData().getArrays()[0].getData());
+
+            await segmentation.addSegmentationRepresentations(toolGroupId, [
+                {
+                    segmentationId,
+                    type: csEnums.SegmentationRepresentations.Labelmap,
+                },
+            ]);
 
             renderingEngine.renderViewports([viewportId1, viewportId2, viewportId3]);
         }

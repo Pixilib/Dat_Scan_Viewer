@@ -1,5 +1,5 @@
-import { cache, getRenderingEngine } from '@cornerstonejs/core'
-import { RectangleROIThresholdTool, Enums as csEnums, ToolGroupManager, annotation as Anno, segmentation, utilities as CsToolsUtils } from '@cornerstonejs/tools'
+import { cache, getEnabledElementByIds, getRenderingEngine } from '@cornerstonejs/core'
+import { RectangleROIThresholdTool, Enums as csEnums, ToolGroupManager, annotation as Anno, segmentation, utilities as CsToolsUtils, EllipticalROITool, CircleScissorsTool } from '@cornerstonejs/tools'
 import $ from 'jquery'
 
 
@@ -13,6 +13,8 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
     let elementView2;
     let elementView3;
 
+    let isSecondaryTool = false;
+
     let segmentationRepresentationByUID;
 
     const onClickInit = () => {
@@ -23,18 +25,39 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
 
         elementView1.addEventListener('mousedown', () => {
             viewPID = viewportId1;
+            if (isSecondaryTool) {
+                isSecondaryTool = false;
+            }
         })
 
         elementView2.addEventListener('mousedown', () => {
             viewPID = viewportId2;
+            if (isSecondaryTool) {
+                isSecondaryTool = false;
+            }
         })
 
         elementView3.addEventListener('mousedown', () => {
             viewPID = viewportId3;
+            if (isSecondaryTool) {
+                isSecondaryTool = false;
+            }
         })
+
+        elementView1.addEventListener('contextmenu', () => {
+            isSecondaryTool = true;
+        })
+
+        elementView2.addEventListener('contextmenu', () => {
+            isSecondaryTool = true;
+        })
+
+        elementView3.addEventListener('contextmenu', () => {
+            isSecondaryTool = true;
+        })
+
         document.getElementById('RectangleROItooldiv').style = "visibility: 'visible'";
         document.getElementById('RectangleROIbuttonTool').hidden = true;
-
 
         const toolGroup = ToolGroupManager.getToolGroup(toolGroupId)
         const activeTool = toolGroup.getActivePrimaryMouseButtonTool();
@@ -44,6 +67,10 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
             document.getElementById('CrossHairUI').hidden = true;
             document.getElementById('RectangleROItooldiv').hidden = false;
         }
+
+        toolGroup.setToolActive(CircleScissorsTool.toolName, {
+            bindings: [{ mouseButton: csEnums.MouseBindings.Secondary }],
+        });
 
         toolGroup.setToolActive(RectangleROIThresholdTool.toolName, {
             bindings: [{ mouseButton: csEnums.MouseBindings.Primary }],
@@ -55,7 +82,13 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
         const renderingEngine = getRenderingEngine(renderingEngineId)
         viewP = renderingEngine.getViewport(viewPID);
 
-        const selectedAnnotationUIDs = Anno.selection.getAnnotationsSelectedByToolName(RectangleROIThresholdTool.toolName);
+        const toolGroup = ToolGroupManager.getToolGroup(toolGroupId)
+        const activeTool = toolGroup.getActivePrimaryMouseButtonTool();
+        console.log(activeTool)
+        if (!isSecondaryTool) {
+
+        }
+        const selectedAnnotationUIDs = Anno.selection.getAnnotationsSelectedByToolName(activeTool);
 
         if (!selectedAnnotationUIDs) {
             throw new Error('No annotation selected ');
@@ -64,6 +97,7 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
         console.log(selectedAnnotationUIDs);
         const annotationUID = selectedAnnotationUIDs[0]["annotationUID"];
         const annotation = Anno.state.getAnnotation(annotationUID);
+        console.log(annotation)
 
         if (!annotation) {
             console.log('ici');
@@ -73,7 +107,6 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
         const viewport = viewP;
         const volumeActorInfo = viewport.getDefaultActor();
         const volume = cache.getVolume(volumeActorInfo.uid);
-
         console.log('4 coins :', annotation.data.handles.points);
         // console.log(volume.spacing)
 
@@ -90,59 +123,47 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
             ]);
 
         segmentationRepresentationByUID = segmentationRepresentationByUIDs[0];
-        console.log(segmentationRepresentationByUID);
+        console.log(segmentationRepresentationByUIDs);
 
         const referenceVolume = cache.getVolume(uid);
 
         const segmentationRepresentation = segmentation.state.getSegmentationRepresentationByUID(toolGroupId, segmentationRepresentationByUID);
-        console.log(segmentationRepresentation.type)
+        console.log(segmentationRepresentation)
 
         const img = CsToolsUtils.segmentation.thresholdVolumeByRange([annotation], [referenceVolume], segmentationRepresentation, {
             lowerThreshold, higherThreshold: upperThreshold, numSlicesToProject, overwrite: false,
         })
 
-        console.log('Segmentation config :', segmentation.state.getSegmentation(segmentationId))
+        // const enabledElement = getEnabledElementByIds(viewPID, renderingEngineId);
+        // console.log(enabledElement);
+        // const img2 = CsToolsUtils.segmentation.createLabelmapVolumeForViewport(viewPID, renderingEngineId, segmentationId)
 
-        // console.log('Volume segmentation :', img);
-        console.log('Volume segmentation :', img.scalarData);
+        console.log('Segmentation :', segmentation.state.getSegmentation(segmentationId))
+
         const segScalar = Array.prototype.slice.call(img.scalarData);
-        console.log(typeof segScalar)
         const result = segScalar.flat().reduce((a, b) => a + b);
-        console.log(result);
+        console.log('Somme labelmap', result);
         // console.log('Volume segmentation :', img.imageData.getBounds());
         // console.log('--------------------------------------')
         // console.log('Volume image de base', volume)
-        console.log('Volume image de base ', volume.scalarData)
 
-        console.log('selection :', segmentationRepresentation);
-        // console.log('actors :', viewP._actors.get(segmentationRepresentationByUID));
-        // const actor = viewP._actors.get(segmentationRepresentationByUID);
-        // console.log(actor.volumeActor.get().mapper.get());
-        // console.log(actor.volumeActor.getVolumes().getBounds());
+        console.log('Segmentation Repre :', segmentationRepresentation);
 
         // let PointMatrix = [];
-        const corners = annotation.data.handles.points;
+        // const corners = annotation.data.handles.points;
 
-        const spacingX = volume.spacing[1]
-        const z = corners[0][0];
-        const pointHightLeftX = corners[0][1];
-        const pointHightRightX = corners[1][1];
-        const pointBottomLeftX = corners[2][1];
-        const pointBottomRightX = corners[3][1];
+        // const spacingX = volume.spacing[1]
+        // const z = corners[0][0];
+        // const pointHightLeftX = corners[0][1];
+        // const pointHightRightX = corners[1][1];
+        // const pointBottomLeftX = corners[2][1];
+        // const pointBottomRightX = corners[3][1];
 
-        const spacingY = volume.spacing[2]
-        const pointHightLeftY = corners[0][2];
-        const pointHightRighY = corners[1][2];
-        const pointBottomLeftY = corners[2][2];
-        const pointBottomRightY = corners[3][2];
-
-        // for (let i = pointHightLeftY; i > pointBottomLeftY; i - spacingY) {
-        //     console.log('i :', i)
-        //     for (let j = pointBottomLeftX; j < pointBottomRightX; j + spacingX) {
-        //         console.log('j :', j)
-        //         PointMatrix.push([z, j, i]);
-        //     }
-        // }
+        // const spacingY = volume.spacing[2]
+        // const pointHightLeftY = corners[0][2];
+        // const pointHightRighY = corners[1][2];
+        // const pointBottomLeftY = corners[2][2];
+        // const pointBottomRightY = corners[3][2];
 
         // Bad method but working(I think)
         // let i = pointHightLeftY;
@@ -156,7 +177,7 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
         //     i = i - spacingY;
         // }
         // console.log(PointMatrix);
-
+        console.log('------------------')
     }
 
     const onSelectedChangeSlices = () => {
