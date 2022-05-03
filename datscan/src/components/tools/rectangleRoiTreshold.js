@@ -84,17 +84,13 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
 
         const toolGroup = ToolGroupManager.getToolGroup(toolGroupId)
         const activeTool = toolGroup.getActivePrimaryMouseButtonTool();
-        console.log(activeTool)
-        if (!isSecondaryTool) {
 
-        }
         const selectedAnnotationUIDs = Anno.selection.getAnnotationsSelectedByToolName(activeTool);
 
         if (!selectedAnnotationUIDs) {
             throw new Error('No annotation selected ');
         }
 
-        console.log(selectedAnnotationUIDs);
         const annotationUID = selectedAnnotationUIDs[0]["annotationUID"];
         const annotation = Anno.state.getAnnotation(annotationUID);
         console.log(annotation)
@@ -108,7 +104,6 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
         const volumeActorInfo = viewport.getDefaultActor();
         const volume = cache.getVolume(volumeActorInfo.uid);
         console.log('4 coins :', annotation.data.handles.points);
-        // console.log(volume.spacing)
 
         const { uid } = volumeActorInfo;
 
@@ -126,10 +121,11 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
         console.log(segmentationRepresentationByUIDs);
 
         const referenceVolume = cache.getVolume(uid);
+        const volumeSeg = cache.getVolume(segmentationId);
+        console.log(volumeSeg);
+
 
         const segmentationRepresentation = segmentation.state.getSegmentationRepresentationByUID(toolGroupId, segmentationRepresentationByUID);
-        console.log(segmentationRepresentation)
-
         const img = CsToolsUtils.segmentation.thresholdVolumeByRange([annotation], [referenceVolume], segmentationRepresentation, {
             lowerThreshold, higherThreshold: upperThreshold, numSlicesToProject, overwrite: false,
         })
@@ -140,7 +136,7 @@ export default ({ toolGroupId, renderingEngineId, viewportId1, viewportId2, view
 
         console.log('Segmentation :', segmentation.state.getSegmentation(segmentationId))
 
-        const segScalar = Array.prototype.slice.call(img.scalarData);
+        const segScalar = Array.prototype.slice.call(volumeSeg.scalarData);
         const result = segScalar.flat().reduce((a, b) => a + b);
         console.log('Somme labelmap', result);
         // console.log('Volume segmentation :', img.imageData.getBounds());

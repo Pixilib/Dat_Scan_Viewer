@@ -4,10 +4,11 @@ import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import initCornerstoneWADOImageLoader from './initCornerstoneWADOImageLoader'
 import { cornerstoneStreamingImageVolumeLoader } from '@cornerstonejs/streaming-image-volume-loader';
 import { makeVolumeMetadata } from '@cornerstonejs/streaming-image-volume-loader/dist/esm/helpers';
-import { addTool, LengthTool, CrosshairsTool, ToolGroupManager, SegmentationDisplayTool, StackScrollMouseWheelTool, ZoomTool, init as ToolInit, BrushTool, RectangleScissorsTool, CircleScissorsTool, SphereScissorsTool, Enums as csEnums, utilities, RectangleROIThresholdTool, segmentation, EllipticalROITool } from '@cornerstonejs/tools';
+import { addTool, LengthTool, CrosshairsTool, ToolGroupManager, SegmentationDisplayTool, StackScrollMouseWheelTool, ZoomTool, init as ToolInit, BrushTool, RectangleScissorsTool, CircleScissorsTool, SphereScissorsTool, Enums as csEnums, utilities as CsToolsUtils, RectangleROIThresholdTool, segmentation, EllipticalROITool } from '@cornerstonejs/tools';
 import CoordsOnCursor from './tools/coordsOnCursor';
 import Drop from './DropZone';
 import RectangleRoiTreshold from './tools/rectangleRoiTreshold';
+import ListOrientation from './tools/ListOrientation';
 
 
 export default () => {
@@ -237,6 +238,7 @@ export default () => {
             ]);
 
             renderingEngine.renderViewports([viewportId1, viewportId2, viewportId3]);
+
         }
         if (files.length > 0) {
             document.getElementById('toolbar').hidden = false
@@ -254,6 +256,7 @@ export default () => {
             <div id='toolbar' style={{ marginTop: '10px', marginBottom: '5px' }}>
                 <RectangleRoiTreshold renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId}></RectangleRoiTreshold>
                 <CoordsOnCursor renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId} volumeId={volumeId}></CoordsOnCursor>
+                <ListOrientation renderingEngineId={renderingEngineId} viewportId={viewportId2}></ListOrientation>
             </div>
             <div id='content'>
                 <div id='DivView' style={{ display: 'flex', flexDirection: 'row' }}>
