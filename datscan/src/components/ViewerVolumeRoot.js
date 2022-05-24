@@ -9,18 +9,22 @@ import CoordsOnCursor from './tools/coordsOnCursor';
 import Drop from './DropZone';
 import RectangleRoiTreshold from './tools/rectangleRoiTreshold';
 import ListOrientation from './tools/ListOrientation';
+import GaeloCrosshair from './tools/gaeloCrosshair';
 
 
 export default () => {
     const [files, setFiles] = useState([]);
+    const [files2, setFiles2] = useState([]);
 
     const renderingEngineId = 'myRenderingEngine';
+    const renderingEngineId2 = 'myRenderingEngine2';
     const toolGroupId = 'STACK_TOOL_GROUP_ID'
     const segmentationId = 'MY_SEGMENTATION_ID';
-    const viewportId1 = 'CT_AXIAL';
-    const viewportId2 = 'CT_SAGITTAL';
+    const viewportId1 = 'Viewport1';
+    const viewportId2 = 'Viewport2';
     const viewportId3 = 'CT_CORONAL';
-    const volumeId = 'cornerStreamingImageVolume: myVolume';
+    let volumeId = 'cornerStreamingImageVolume: myVolume';
+
 
     const viewportColors = {
         [viewportId1]: 'rgb(200, 0, 0)',
@@ -71,6 +75,11 @@ export default () => {
 
     }
 
+    const buildImageId2 = (files) => {
+        setFiles2(files)
+
+    }
+
     async function addSegmentationsToState() {
         // Create a segmentation of the same resolution as the source data
         // using volumeLoader.createAndCacheDerivedVolume.
@@ -107,10 +116,6 @@ export default () => {
             addTool(ZoomTool);
             addTool(StackScrollMouseWheelTool);
             addTool(CrosshairsTool);
-            addTool(SegmentationDisplayTool);
-            addTool(RectangleROIThresholdTool);
-            addTool(EllipticalROITool);
-            addTool(CircleScissorsTool);
 
             volumeLoader.registerVolumeLoader('cornerStreamingImageVolume', cornerstoneStreamingImageVolumeLoader);
             let imageIds = []
@@ -127,12 +132,8 @@ export default () => {
             const volumeMetadata = makeVolumeMetadata(imageIds);
 
             const element1 = document.getElementById('view1');
-            const element2 = document.getElementById('view2');
-            const element3 = document.getElementById('view3');
 
             element1.oncontextmenu = (e) => e.preventDefault();
-            element2.oncontextmenu = (e) => e.preventDefault();
-            element3.oncontextmenu = (e) => e.preventDefault();
 
             const volume = await volumeLoader.createAndCacheVolume(volumeId, {
                 imageIds
@@ -150,31 +151,11 @@ export default () => {
                     orientation: CONSTANTS.ORIENTATION.AXIAL,
                     background: [0, 0, 0],
                 },
-            },
-            {
-                viewportId: viewportId2,
-                element: element2,
-                type: Enums.ViewportType.ORTHOGRAPHIC,
-                defaultOptions: {
-                    orientation: CONSTANTS.ORIENTATION.SAGITTAL,
-                    background: [0, 0, 0],
-                },
-            },
-            {
-                viewportId: viewportId3,
-                element: element3,
-                type: Enums.ViewportType.ORTHOGRAPHIC,
-                defaultOptions: {
-                    orientation: CONSTANTS.ORIENTATION.CORONAL,
-                    background: [0, 0, 0],
-                },
             }];
 
             renderingEngine.setViewports(viewportInput);
 
             volume.load();
-
-            await addSegmentationsToState();
 
             await setVolumesForViewports(renderingEngine, [
                 {
@@ -183,7 +164,7 @@ export default () => {
                     blendMode: Enums.BlendModes.MAXIMUM_INTENSITY_BLEND
                 },
             ],
-                [viewportId1, viewportId2, viewportId3]
+                [viewportId1]
             );
 
             //Définition du groupe qui va contenir tout les outils
@@ -192,16 +173,10 @@ export default () => {
 
             //Ajout des outils au viewport
             toolGroup.addViewport(viewportId1, renderingEngineId);
-            toolGroup.addViewport(viewportId2, renderingEngineId);
-            toolGroup.addViewport(viewportId3, renderingEngineId);
 
             // Tools
             toolGroup.addTool(ZoomTool.toolName)
             toolGroup.addTool(StackScrollMouseWheelTool.toolName);
-            toolGroup.addTool(SegmentationDisplayTool.toolName);
-            toolGroup.addTool(RectangleROIThresholdTool.toolName);
-            toolGroup.addTool(EllipticalROITool.toolName);
-            toolGroup.addTool(CircleScissorsTool.toolName);
             toolGroup.addTool(CrosshairsTool.toolName, {
                 getReferenceLineColor,
                 getReferenceLineControllable,
@@ -209,7 +184,6 @@ export default () => {
                 getReferenceLineSlabThicknessControlsOn,
             });
 
-            toolGroup.setToolEnabled(SegmentationDisplayTool.toolName);
             // toolGroup.setToolEnabled(CrosshairsTool.toolName);
 
             //De base sur la molette
@@ -219,25 +193,7 @@ export default () => {
             // });
             //The crosshairtool is set to active when the user clicks on the CrossHair button which is the component CoordsOnCursor
 
-            const viewp1 = renderingEngine.getViewport(viewportId1)
-            const viewp1Data = viewp1.getImageData();
-            // console.log('Matrice point VP1', viewp1Data['imageData'].getPointData().getArrays()[0].getData());
-            console.log(viewp1Data['imageData'].getPointData().getArrays()[0]);
-            console.log('Matrice point VP1', viewp1Data['imageData'].getPointData().getArrays()[0].get());
-
-
-            const viewp2 = renderingEngine.getViewport(viewportId2)
-            const viewp2Data = viewp2.getImageData();
-            // console.log('Matrice point VP2', viewp2Data['imageData'].getPointData().getArrays()[0].getData());
-
-            await segmentation.addSegmentationRepresentations(toolGroupId, [
-                {
-                    segmentationId,
-                    type: csEnums.SegmentationRepresentations.Labelmap,
-                },
-            ]);
-
-            renderingEngine.renderViewports([viewportId1, viewportId2, viewportId3]);
+            renderingEngine.renderViewports([viewportId1]);
 
         }
         if (files.length > 0) {
@@ -249,20 +205,88 @@ export default () => {
 
     }, [files])
 
+    useEffect(() => {
+
+        const run2 = async () => {
+
+            let imageIds = []
+            files2.forEach(file => {
+                let imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
+                imageIds.push(imageId)
+            });
+
+            for (let imageId of imageIds) {
+                const firstImage = cornerstoneWADOImageLoader.wadouri.loadImage(imageId)
+                const fImage = await firstImage["promise"]
+            }
+
+            const volumeMetadata = makeVolumeMetadata(imageIds);
+            const element2 = document.getElementById('view2');
+
+            element2.oncontextmenu = (e) => e.preventDefault();
+
+            volumeId = 'cornerStreamingImageVolume: myVolumetwo';
+
+            const volume = await volumeLoader.createAndCacheVolume(volumeId, {
+                imageIds
+            });
+
+            const renderingEngine = new RenderingEngine(renderingEngineId2)
+            const viewportInput = [{
+                viewportId: viewportId2,
+                element: element2,
+                type: Enums.ViewportType.ORTHOGRAPHIC,
+                defaultOptions: {
+                    orientation: CONSTANTS.ORIENTATION.AXIAL,
+                    background: [0, 0, 0],
+                },
+            }];
+
+            renderingEngine.setViewports(viewportInput);
+
+            const viewport = renderingEngine.getViewport(viewportId2);
+
+            volume.load();
+
+            console.log(cache);
+
+            await setVolumesForViewports(renderingEngine, [
+                {
+                    volumeId,
+                    // callback: setCtTransferFunctionForVolumeActor,
+                    blendMode: Enums.BlendModes.MAXIMUM_INTENSITY_BLEND
+                },
+            ],
+                [viewportId2]
+            );
+
+            renderingEngine.renderViewports([viewportId2]);
+
+        }
+        if (files2.length > 0) {
+            document.getElementById('toolbar').hidden = false
+            run2();
+        } else {
+            document.getElementById('toolbar').hidden = true
+        }
+
+    }, [files2])
+
     return (
         <>
             <h1>DatScan Viewer / Volume Viewport</h1>
             <Drop set={buildImageId}></Drop>
+            <Drop set={buildImageId2}></Drop>
             <div id='toolbar' style={{ marginTop: '10px', marginBottom: '5px' }}>
-                <RectangleRoiTreshold renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId}></RectangleRoiTreshold>
+                {/* <RectangleRoiTreshold renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId}></RectangleRoiTreshold>
                 <CoordsOnCursor renderingEngineId={renderingEngineId} viewportId1={viewportId1} viewportId2={viewportId2} viewportId3={viewportId3} toolGroupId={toolGroupId} volumeId={volumeId}></CoordsOnCursor>
-                <ListOrientation renderingEngineId={renderingEngineId} viewportId={viewportId2}></ListOrientation>
+                <ListOrientation renderingEngineId={renderingEngineId} viewportId={viewportId2}></ListOrientation> */}
+                <GaeloCrosshair renderingEngineId1={renderingEngineId} renderingEngineId2={renderingEngineId2} viewportId1={viewportId1} viewportId2={viewportId2}></GaeloCrosshair>
             </div>
             <div id='content'>
                 <div id='DivView' style={{ display: 'flex', flexDirection: 'row' }}>
                     <div id='view1' style={{ width: '409px', height: '500px' }}></div>
                     <div id='view2' style={{ width: '409px', height: '500px' }}></div>
-                    <div id='view3' style={{ width: '409px', height: '500px' }}></div>
                 </div>
             </div>
 
