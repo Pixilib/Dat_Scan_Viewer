@@ -1,5 +1,6 @@
 import ViewerRoot from './components/ViewerRoot';
 import ViewerVolumeRoot from './components/ViewerVolumeRoot';
+import ViewerCrosshair from './components/ViewerCrosshair';
 
 function App() {
 
@@ -8,7 +9,7 @@ function App() {
       <header className="App-head">
         <div className='content'></div>
         {/* <ViewerRoot></ViewerRoot> */}
-        <ViewerVolumeRoot></ViewerVolumeRoot>
+        <ViewerCrosshair></ViewerCrosshair>
       </header>
     </div>
   );

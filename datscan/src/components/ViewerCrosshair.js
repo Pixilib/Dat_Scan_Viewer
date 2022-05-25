@@ -1,13 +1,27 @@
-import { getRenderingEngine, utilities as csUtils, VolumeViewport, cache } from "@cornerstonejs/core";
-import { CrosshairsTool, ToolGroupManager, Enums as CsToolEnums } from "@cornerstonejs/tools";
+import { cache, getRenderingEngine } from '@cornerstonejs/core';
+import { toLowHighRange } from '@cornerstonejs/core/dist/esm/utilities/windowLevel';
+import { addTool, LengthTool, CrosshairsTool, ToolGroupManager, SegmentationDisplayTool, Enums, StackScrollMouseWheelTool, ZoomTool, init as ToolInit, BrushTool, RectangleScissorsTool, CircleScissorsTool, SphereScissorsTool, Enums as csEnums, utilities as CsToolsUtils, RectangleROIThresholdTool, segmentation, EllipticalROITool } from '@cornerstonejs/tools';
+import { useEffect } from 'react';
 
-export default ({ renderingEngineId1, renderingEngineId2, viewportId1, viewportId2 }) => {
+import ViewerVolumeRoot from "./ViewerVolumeRoot"
+
+export default () => {
+    const viewID1 = 'view1';
+    const renderID1 = 'myRenderingEngineId1';
+    const viewPID1 = 'Viewport1';
+
+    const viewID2 = 'view2';
+    const renderID2 = 'myRenderingEngineId2';
+    const viewPID2 = 'Viewport2';
+
+
+    cache.setMaxCacheSize(2147483648);
 
     const getCoord = () => {
         document.getElementById('CrossHairUI').style = "visibility: 'visible'";
         let viewPCenter = [];
-        const elementView1 = document.getElementById('view1');
-        const elementView2 = document.getElementById('view2');
+        const elementView1 = document.getElementById(viewID1);
+        const elementView2 = document.getElementById(viewID2);
 
         const elementCanvas1 = document.getElementById('canvasC1');
         const coordWorld1x = document.getElementById('worldC1_x')
@@ -22,10 +36,10 @@ export default ({ renderingEngineId1, renderingEngineId2, viewportId1, viewportI
         const sync2 = document.getElementById('sync2');
 
 
-        const renderingEngine1 = getRenderingEngine(renderingEngineId1);
-        const renderingEngine2 = getRenderingEngine(renderingEngineId2)
-        const viewp1 = renderingEngine1.getViewport(viewportId1);
-        const viewp2 = renderingEngine2.getViewport(viewportId2);
+        const renderingEngine1 = getRenderingEngine(renderID1);
+        const renderingEngine2 = getRenderingEngine(renderID2);
+        const viewp1 = renderingEngine1.getViewport(viewPID1);
+        const viewp2 = renderingEngine2.getViewport(viewPID2);
 
         const viewp2Data = viewp2.getImageData();
         viewPCenter = viewp2Data['imageData'].getCenter();
@@ -177,10 +191,68 @@ export default ({ renderingEngineId1, renderingEngineId2, viewportId1, viewportI
             }
         })
 
+        const toolGroup = ToolGroupManager.getToolGroup('STACK_TOOL_GROUP_ID');
+        console.log(toolGroup);
+
+        toolGroup.addTool(CrosshairsTool.toolName, {
+            getReferenceLineColor,
+            getReferenceLineControllable,
+            getReferenceLineDraggableRotatable,
+            getReferenceLineSlabThicknessControlsOn,
+        });
+
+        toolGroup.setToolEnabled(CrosshairsTool.toolName);
+        toolGroup.setToolActive(CrosshairsTool.toolName, {
+            bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
+        });
+
+        console.log(toolGroup.getToolInstance(CrosshairsTool.toolName));
+
+    }
+
+    const viewportColors = {
+        [viewPID1]: 'rgb(200, 0, 0)',
+        [viewPID2]: 'rgb(200, 200, 0)',
+    };
+
+    const viewportReferenceLineControllable = [
+        viewPID1,
+        viewPID2,
+    ];
+
+    const viewportReferenceLineDraggableRotatable = [
+        viewPID1,
+        viewPID2,
+    ];
+
+    const viewportReferenceLineSlabThicknessControlsOn = [
+        viewPID1,
+        viewPID2,
+    ];
+
+    function getReferenceLineColor(viewportId) {
+        return viewportColors[viewportId];
+    }
+
+    function getReferenceLineControllable(viewportId) {
+        const index = viewportReferenceLineControllable.indexOf(viewportId);
+        return index !== -1;
+    }
+
+    function getReferenceLineDraggableRotatable(viewportId) {
+        const index = viewportReferenceLineDraggableRotatable.indexOf(viewportId);
+        return index !== -1;
+    }
+
+    function getReferenceLineSlabThicknessControlsOn(viewportId) {
+        const index =
+            viewportReferenceLineSlabThicknessControlsOn.indexOf(viewportId);
+        return index !== -1;
     }
 
     return (
         <>
+            <h1>DatScan Viewer / Volume Viewport</h1>
             <button id="crosshair-button" onClick={getCoord}>CrossHair</button>
             <div id="CrossHairUI" style={{ visibility: 'hidden' }}>
                 <div style={{ display: 'flex' }}>
@@ -203,6 +275,11 @@ export default ({ renderingEngineId1, renderingEngineId2, viewportId1, viewportI
                     </div>
                 </div>
             </div>
+            <div id="viewers" style={{ flexDirection: 'row', display: 'flex' }}>
+                <ViewerVolumeRoot view={viewID1} renderID={renderID1} viewPID={viewPID1}></ViewerVolumeRoot>
+                <ViewerVolumeRoot view={viewID2} renderID={renderID2} viewPID={viewPID2}></ViewerVolumeRoot>
+            </div>
         </>
+
     )
 }
