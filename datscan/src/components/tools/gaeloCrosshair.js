@@ -69,16 +69,24 @@ export default ({ renderingEngineId1, renderingEngineId2, viewportId1, viewportI
         let firstClick = false;
         let secondClick = false;
 
-        let refPos1;
-        let refPos2;
+        let canvasRefPos1;
+        let canvasRefPos2;
+        let worldRefPos1;
+        let worldRefPos2;
         const offset = [];
 
         elementView1.addEventListener('click', (evt) => {
             if (firstClick === false) {
                 const rect = elementView1.getBoundingClientRect();
-                refPos1 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
-                console.log('Coor ref viewport 1 :', refPos1);
+                canvasRefPos1 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
+                worldRefPos1 = viewp1.canvasToWorld(canvasRefPos1);
+                console.log('Coor ref viewport 1 :', worldRefPos1);
                 sync1.innerHTML = 'Synchronized';
+
+                coordWorld1x.innerHTML = worldRefPos1[0].toFixed(2) + ' , ';
+                coordWorld1y.innerHTML = worldRefPos1[1].toFixed(2) + ' , ';
+                coordWorld1z.innerHTML = worldRefPos1[2].toFixed(2);
+
                 firstClick = true;
             }
         })
@@ -86,112 +94,123 @@ export default ({ renderingEngineId1, renderingEngineId2, viewportId1, viewportI
         elementView2.addEventListener('click', (evt) => {
             if (secondClick === false && firstClick === true) {
                 const rect = elementView2.getBoundingClientRect();
-                refPos2 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
-                console.log('Coor ref viewport 2 :', refPos2);
+                canvasRefPos2 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
+                worldRefPos2 = viewp2.canvasToWorld(canvasRefPos2);
+                console.log('Coor ref viewport 2 :', worldRefPos2);
                 sync2.innerHTML = 'Synchronized';
-                offset[0] = refPos2[0] - refPos1[0];
-                offset[1] = refPos2[1] - refPos1[1];
+
+                coordWorld2x.innerHTML = worldRefPos2[0].toFixed(2) + ' , ';
+                coordWorld2y.innerHTML = worldRefPos2[1].toFixed(2) + ' , ';
+                coordWorld2z.innerHTML = worldRefPos2[2].toFixed(2);
+
+                offset[0] = worldRefPos2[0] - worldRefPos1[0];
+                offset[1] = worldRefPos2[1] - worldRefPos1[1];
+                offset[2] = worldRefPos2[2] - worldRefPos1[2];
                 console.log('offset entre les viewports :', offset);
                 secondClick = true;
             }
         })
 
-        // elementView1.addEventListener('mousedown', (evt) => {
-        //     const rect = elementView1.getBoundingClientRect();
+        elementView1.addEventListener('mousedown', (evt) => {
+            if (secondClick === true) {
+                const rect = elementView1.getBoundingClientRect();
 
-        //     const canvasPos1 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
-        //     const worldPos1 = viewp1.canvasToWorld(canvasPos1);
+                const canvasPos1 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
+                const worldPos1 = viewp1.canvasToWorld(canvasPos1);
 
-        //     elementCanvas1.innerHTML = 'Canvas : ' + canvasPos1[0] + ' , ' + canvasPos1[1];
-        //     coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
-        //     coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
-        //     coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
+                elementCanvas1.innerHTML = 'Canvas : ' + canvasPos1[0] + ' , ' + canvasPos1[1];
+                coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
+                coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
+                coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
 
-        //     const worldPos2 = [worldPos1[0], worldPos1[1], parseInt(coordWorld2z.innerHTML)];
-        //     const canvasPos2 = viewp1.worldToCanvas(worldPos1);
+                const worldPos2 = [worldPos1[0] + offset[0], worldPos1[1] + offset[1], parseInt(coordWorld2z.innerHTML)];
+                const canvasPos2 = viewp1.worldToCanvas(worldPos1);
 
-        //     elementCanvas2.innerHTML = 'Canvas : ' + Math.trunc(canvasPos2[0]) + ' , ' + Math.trunc(canvasPos2[1]);
-        //     coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
-        //     coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
-        //     coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
-        //     isClicked = true;
-        // })
+                elementCanvas2.innerHTML = 'Canvas : ' + Math.trunc(canvasPos2[0]) + ' , ' + Math.trunc(canvasPos2[1]);
+                coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
+                coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
+                coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
+                isClicked = true;
+            }
+        })
 
-        // elementView1.addEventListener('mouseup', () => {
-        //     isClicked = false;
-        // })
+        elementView1.addEventListener('mouseup', () => {
+            isClicked = false;
+        })
 
-        // elementView2.addEventListener('mousedown', (evt) => {
-        //     const rect = elementView2.getBoundingClientRect();
+        elementView2.addEventListener('mousedown', (evt) => {
+            if (secondClick === true) {
+                const rect = elementView2.getBoundingClientRect();
 
-        //     const canvasPos2 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
-        //     const worldPos2 = viewp2.canvasToWorld(canvasPos2);
+                const canvasPos2 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
+                const worldPos2 = viewp2.canvasToWorld(canvasPos2);
 
-        //     elementCanvas2.innerHTML = 'Canvas : ' + canvasPos2[0] + ' , ' + canvasPos2[1];
-        //     coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
-        //     coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
-        //     coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
+                elementCanvas2.innerHTML = 'Canvas : ' + canvasPos2[0] + ' , ' + canvasPos2[1];
+                coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
+                coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
+                coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
 
-        //     const worldPos1 = [parseInt(coordWorld1x.innerHTML), worldPos2[1], worldPos2[2]];
-        //     const canvasPos1 = viewp1.worldToCanvas(worldPos1);
+                const worldPos1 = [parseInt(coordWorld1x.innerHTML), worldPos2[1] - offset[1], worldPos2[2] - offset[2]];
+                const canvasPos1 = viewp1.worldToCanvas(worldPos1);
 
-        //     elementCanvas1.innerHTML = 'Canvas : ' + Math.trunc(canvasPos1[0]) + ' , ' + Math.trunc(canvasPos1[1]);
-        //     coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
-        //     coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
-        //     coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
+                elementCanvas1.innerHTML = 'Canvas : ' + Math.trunc(canvasPos1[0]) + ' , ' + Math.trunc(canvasPos1[1]);
+                coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
+                coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
+                coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
 
-        //     isClicked = true;
-        // })
+                isClicked = true;
+            }
+        })
 
-        // elementView2.addEventListener('mouseup', () => {
-        //     isClicked = false;
-        // })
+        elementView2.addEventListener('mouseup', () => {
+            isClicked = false;
+        })
 
 
-        // elementView1.addEventListener('mousemove', (evt) => {
-        //     if (isClicked === true) {
-        //         const rect = elementView1.getBoundingClientRect();
+        elementView1.addEventListener('mousemove', (evt) => {
+            if (isClicked === true) {
+                const rect = elementView1.getBoundingClientRect();
 
-        //         const canvasPos1 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
-        //         const worldPos1 = viewp1.canvasToWorld(canvasPos1);
+                const canvasPos1 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
+                const worldPos1 = viewp1.canvasToWorld(canvasPos1);
 
-        //         elementCanvas1.innerHTML = 'Canvas : ' + canvasPos1[0] + ' , ' + canvasPos1[1];
-        //         coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
-        //         coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
-        //         coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
+                elementCanvas1.innerHTML = 'Canvas : ' + canvasPos1[0] + ' , ' + canvasPos1[1];
+                coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
+                coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
+                coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
 
-        //         const worldPos2 = [worldPos1[0], worldPos1[1], parseInt(coordWorld2z.innerHTML)];
-        //         const canvasPos2 = viewp1.worldToCanvas(worldPos1);
+                const worldPos2 = [worldPos1[0] + offset[0], worldPos1[1] + offset[1], worldPos1[2] + offset[2]];
+                const canvasPos2 = viewp1.worldToCanvas(worldPos1);
 
-        //         elementCanvas2.innerHTML = 'Canvas : ' + Math.trunc(canvasPos2[0]) + ' , ' + Math.trunc(canvasPos2[1]);
-        //         coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
-        //         coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
-        //         coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
+                elementCanvas2.innerHTML = 'Canvas : ' + Math.trunc(canvasPos2[0]) + ' , ' + Math.trunc(canvasPos2[1]);
+                coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
+                coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
+                coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
 
-        //     }
-        // })
+            }
+        })
 
-        // elementView2.addEventListener('mousemove', (evt) => {
-        //     if (isClicked === true) {
-        //         const rect = elementView2.getBoundingClientRect();
+        elementView2.addEventListener('mousemove', (evt) => {
+            if (isClicked === true) {
+                const rect = elementView2.getBoundingClientRect();
 
-        //         const canvasPos2 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
-        //         const worldPos2 = viewp2.canvasToWorld(canvasPos2);
+                const canvasPos2 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
+                const worldPos2 = viewp2.canvasToWorld(canvasPos2);
 
-        //         elementCanvas2.innerHTML = 'Canvas : ' + canvasPos2[0] + ' , ' + canvasPos2[1];
-        //         coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
-        //         coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
-        //         coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
+                elementCanvas2.innerHTML = 'Canvas : ' + canvasPos2[0] + ' , ' + canvasPos2[1];
+                coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
+                coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
+                coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
 
-        //         const worldPos1 = [parseInt(coordWorld1x.innerHTML), worldPos2[1], parseInt(coordWorld1z.innerHTML)];
-        //         const canvasPos1 = viewp1.worldToCanvas(worldPos1);
+                const worldPos1 = [worldPos2[0] - offset[0], worldPos2[1] - offset[1], worldPos2[2] - offset[2]];
+                const canvasPos1 = viewp1.worldToCanvas(worldPos1);
 
-        //         elementCanvas1.innerHTML = 'Canvas : ' + Math.trunc(canvasPos1[0]) + ' , ' + Math.trunc(canvasPos1[1]);
-        //         coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
-        //         coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
-        //         coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
-        //     }
-        // })
+                elementCanvas1.innerHTML = 'Canvas : ' + Math.trunc(canvasPos1[0]) + ' , ' + Math.trunc(canvasPos1[1]);
+                coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
+                coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
+                coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
+            }
+        })
 
     }
 
