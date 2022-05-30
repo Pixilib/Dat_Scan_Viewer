@@ -7,12 +7,22 @@ import ViewerVolumeRoot from "./ViewerVolumeRoot"
 
 export default () => {
     const viewID1 = 'view1';
+    const viewID12 = 'view12';
+    const viewID13 = 'view13';
     const renderID1 = 'myRenderingEngineId1';
     const viewPID1 = 'Viewport1';
+    const viewPID12 = 'Viewport12';
+    const viewPID13 = 'Viewport13';
+    const toolGID1 = 'ToolGroupID1';
 
     const viewID2 = 'view2';
+    const viewID22 = 'view22';
+    const viewID23 = 'view23';
     const renderID2 = 'myRenderingEngineId2';
     const viewPID2 = 'Viewport2';
+    const viewPID22 = 'Viewport22';
+    const viewPID23 = 'Viewport23';
+    const toolGID2 = 'ToolGroupID2'
 
 
     cache.setMaxCacheSize(2147483648);
@@ -24,15 +34,15 @@ export default () => {
         const elementView2 = document.getElementById(viewID2);
 
         const elementCanvas1 = document.getElementById('canvasC1');
-        const coordWorld1x = document.getElementById('worldC1_x')
-        const coordWorld1y = document.getElementById('worldC1_y')
-        const coordWorld1z = document.getElementById('worldC1_z')
+        const coordWorld1x = document.getElementById('worldC1_x');
+        const coordWorld1y = document.getElementById('worldC1_y');
+        const coordWorld1z = document.getElementById('worldC1_z');
         const sync1 = document.getElementById('sync1');
 
         const elementCanvas2 = document.getElementById('canvasC2');
-        const coordWorld2x = document.getElementById('worldC2_x')
-        const coordWorld2y = document.getElementById('worldC2_y')
-        const coordWorld2z = document.getElementById('worldC2_z')
+        const coordWorld2x = document.getElementById('worldC2_x');
+        const coordWorld2y = document.getElementById('worldC2_y');
+        const coordWorld2z = document.getElementById('worldC2_z');
         const sync2 = document.getElementById('sync2');
 
 
@@ -191,64 +201,85 @@ export default () => {
             }
         })
 
-        const toolGroup = ToolGroupManager.getToolGroup('STACK_TOOL_GROUP_ID');
-        console.log(toolGroup);
+        const toolGroup1 = ToolGroupManager.getToolGroup(toolGID1);
+        console.log(toolGroup1);
 
-        toolGroup.addTool(CrosshairsTool.toolName, {
+        toolGroup1.addTool(CrosshairsTool.toolName, {
             getReferenceLineColor,
             getReferenceLineControllable,
             getReferenceLineDraggableRotatable,
             getReferenceLineSlabThicknessControlsOn,
         });
 
-        toolGroup.setToolEnabled(CrosshairsTool.toolName);
-        toolGroup.setToolActive(CrosshairsTool.toolName, {
+        toolGroup1.setToolEnabled(CrosshairsTool.toolName);
+        toolGroup1.setToolActive(CrosshairsTool.toolName, {
             bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
         });
 
-        console.log(toolGroup.getToolInstance(CrosshairsTool.toolName));
+        console.log(toolGroup1.getToolInstance(CrosshairsTool.toolName));
+
+        // const toolGroup2 = ToolGroupManager.getToolGroup(toolGID2);
+        // console.log(toolGroup2);
+
+        // toolGroup2.addTool(CrosshairsTool.toolName, {
+        //     getReferenceLineColor,
+        //     getReferenceLineControllable,
+        //     getReferenceLineDraggableRotatable,
+        //     getReferenceLineSlabThicknessControlsOn,
+        // });
+
+        // toolGroup2.setToolEnabled(CrosshairsTool.toolName);
+        // toolGroup2.setToolActive(CrosshairsTool.toolName, {
+        //     bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
+        // });
+
+        // console.log(toolGroup2.getToolInstance(CrosshairsTool.toolName));
 
     }
 
     const viewportColors = {
         [viewPID1]: 'rgb(200, 0, 0)',
-        [viewPID2]: 'rgb(200, 200, 0)',
+        [viewPID12]: 'rgb(200, 200, 0)',
+        [viewPID13]: 'rgb(0, 200, 200)',
     };
 
     const viewportReferenceLineControllable = [
         viewPID1,
-        viewPID2,
+        viewPID12,
+        viewPID13,
     ];
 
     const viewportReferenceLineDraggableRotatable = [
         viewPID1,
-        viewPID2,
+        viewPID12,
+        viewPID13,
     ];
 
     const viewportReferenceLineSlabThicknessControlsOn = [
         viewPID1,
-        viewPID2,
+        viewPID12,
+        viewPID13,
     ];
 
     function getReferenceLineColor(viewportId) {
         return viewportColors[viewportId];
-    }
+    };
 
     function getReferenceLineControllable(viewportId) {
         const index = viewportReferenceLineControllable.indexOf(viewportId);
         return index !== -1;
-    }
+    };
 
     function getReferenceLineDraggableRotatable(viewportId) {
         const index = viewportReferenceLineDraggableRotatable.indexOf(viewportId);
         return index !== -1;
-    }
+    };
 
     function getReferenceLineSlabThicknessControlsOn(viewportId) {
         const index =
             viewportReferenceLineSlabThicknessControlsOn.indexOf(viewportId);
         return index !== -1;
-    }
+    };
 
     return (
         <>
@@ -275,9 +306,9 @@ export default () => {
                     </div>
                 </div>
             </div>
-            <div id="viewers" style={{ flexDirection: 'row', display: 'flex' }}>
-                <ViewerVolumeRoot view={viewID1} renderID={renderID1} viewPID={viewPID1}></ViewerVolumeRoot>
-                <ViewerVolumeRoot view={viewID2} renderID={renderID2} viewPID={viewPID2}></ViewerVolumeRoot>
+            <div id="viewers" style={{ flexDirection: 'column', display: 'flex' }}>
+                <ViewerVolumeRoot view={viewID1} renderID={renderID1} viewPID={viewPID1} toolGroupId={toolGID1} view2={viewID12} view3={viewID13} viewPID2={viewPID12} viewPID3={viewID13}></ViewerVolumeRoot>
+                <ViewerVolumeRoot view={viewID2} renderID={renderID2} viewPID={viewPID2} toolGroupId={toolGID2} view2={viewID22} view3={viewID23} viewPID2={viewPID22} viewPID3={viewID23}></ViewerVolumeRoot>
             </div>
         </>
 

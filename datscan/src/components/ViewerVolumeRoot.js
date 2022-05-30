@@ -12,12 +12,8 @@ import ListOrientation from './tools/ListOrientation';
 import GaeloCrosshair from './tools/gaeloCrosshair';
 
 
-export default ({ view, renderID, viewPID }) => {
+export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, toolGroupId }) => {
     const [files, setFiles] = useState([]);
-    const toolGroupId = 'STACK_TOOL_GROUP_ID'
-    const viewportId1 = 'Viewport1';
-    const viewportId2 = 'Viewport2';
-    const viewportId3 = 'CT_CORONAL';
     let volumeId = 'cornerStreamingImageVolume: myVolume';
 
     const buildImageId = (files) => {
@@ -28,7 +24,7 @@ export default ({ view, renderID, viewPID }) => {
     useEffect(() => {
 
         const run = async () => {
-            if (ToolGroupManager.getToolGroup(toolGroupId) != null) {
+            if (ToolGroupManager.getToolGroup('ToolGroupID1') != null) {
 
                 let imageIds = []
                 files.forEach(file => {
@@ -42,29 +38,53 @@ export default ({ view, renderID, viewPID }) => {
                 }
 
                 const volumeMetadata = makeVolumeMetadata(imageIds);
-                const element2 = document.getElementById(view);
 
+                const element1 = document.getElementById(view);
+                element1.oncontextmenu = (e) => e.preventDefault();
+
+                const element2 = document.getElementById(view2);
                 element2.oncontextmenu = (e) => e.preventDefault();
+
+                const element3 = document.getElementById(view3);
+                element3.oncontextmenu = (e) => e.preventDefault();
 
                 volumeId = 'cornerStreamingImageVolume: myVolumetwo';
 
                 const volume = await volumeLoader.createAndCacheVolume(volumeId, {
                     imageIds
                 });
+
                 const renderingEngine = new RenderingEngine(renderID);
+
                 const viewportInput = [{
                     viewportId: viewPID,
-                    element: element2,
+                    element: element1,
                     type: Enums.ViewportType.ORTHOGRAPHIC,
                     defaultOptions: {
                         orientation: CONSTANTS.ORIENTATION.AXIAL,
                         background: [0, 0, 0],
                     },
+                },
+                {
+                    viewportId: viewPID2,
+                    element: element2,
+                    type: Enums.ViewportType.ORTHOGRAPHIC,
+                    defaultOptions: {
+                        orientation: CONSTANTS.ORIENTATION.SAGITTAL,
+                        background: [0, 0, 0],
+                    },
+                },
+                {
+                    viewportId: viewPID3,
+                    element: element3,
+                    type: Enums.ViewportType.ORTHOGRAPHIC,
+                    defaultOptions: {
+                        orientation: CONSTANTS.ORIENTATION.CORONAL,
+                        background: [0, 0, 0],
+                    },
                 }];
 
                 renderingEngine.setViewports(viewportInput);
-
-                const viewport = renderingEngine.getViewport(viewPID);
 
                 volume.load();
 
@@ -77,13 +97,29 @@ export default ({ view, renderID, viewPID }) => {
                         blendMode: Enums.BlendModes.MAXIMUM_INTENSITY_BLEND
                     },
                 ],
-                    [viewPID]
+                    [viewPID, viewPID2, viewPID3]
                 );
 
-                const toolGroup = ToolGroupManager.getToolGroup(toolGroupId);
-                toolGroup.addViewport(viewPID, renderID);
+                //Définition du groupe qui va contenir tout les outils
+                const toolGroup = ToolGroupManager.createToolGroup(toolGroupId);
 
-                renderingEngine.renderViewports([viewPID]);
+                //Ajout des outils au viewport 
+                toolGroup.addViewport(viewPID, renderID);
+                toolGroup.addViewport(viewPID2, renderID);
+                toolGroup.addViewport(viewPID3, renderID);
+                console.log(toolGroup);
+
+                // Tools
+                toolGroup.addTool(ZoomTool.toolName)
+                toolGroup.addTool(StackScrollMouseWheelTool.toolName);
+
+                //De base sur la molette
+                toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
+                toolGroup.setToolActive(ZoomTool.toolName, {
+                    bindings: [{ mouseButton: csEnums.MouseBindings.Secondary }],
+                });
+
+                renderingEngine.renderViewports([viewPID, viewPID2, viewPID3]);
             } else {
                 //Configuration et initialisation des libraries
                 initCornerstoneWADOImageLoader();
@@ -110,8 +146,13 @@ export default ({ view, renderID, viewPID }) => {
                 const volumeMetadata = makeVolumeMetadata(imageIds);
 
                 const element1 = document.getElementById(view);
-
                 element1.oncontextmenu = (e) => e.preventDefault();
+
+                const element2 = document.getElementById(view2);
+                element2.oncontextmenu = (e) => e.preventDefault();
+
+                const element3 = document.getElementById(view3);
+                element3.oncontextmenu = (e) => e.preventDefault();
 
                 const volume = await volumeLoader.createAndCacheVolume(volumeId, {
                     imageIds
@@ -129,6 +170,24 @@ export default ({ view, renderID, viewPID }) => {
                         orientation: CONSTANTS.ORIENTATION.AXIAL,
                         background: [0, 0, 0],
                     },
+                },
+                {
+                    viewportId: viewPID2,
+                    element: element2,
+                    type: Enums.ViewportType.ORTHOGRAPHIC,
+                    defaultOptions: {
+                        orientation: CONSTANTS.ORIENTATION.SAGITTAL,
+                        background: [0, 0, 0],
+                    },
+                },
+                {
+                    viewportId: viewPID3,
+                    element: element3,
+                    type: Enums.ViewportType.ORTHOGRAPHIC,
+                    defaultOptions: {
+                        orientation: CONSTANTS.ORIENTATION.CORONAL,
+                        background: [0, 0, 0],
+                    },
                 }];
 
                 renderingEngine.setViewports(viewportInput);
@@ -142,7 +201,7 @@ export default ({ view, renderID, viewPID }) => {
                         blendMode: Enums.BlendModes.MAXIMUM_INTENSITY_BLEND
                     },
                 ],
-                    [viewPID]
+                    [viewPID, viewPID2, viewPID3]
                 );
 
                 //Définition du groupe qui va contenir tout les outils
@@ -150,6 +209,8 @@ export default ({ view, renderID, viewPID }) => {
 
                 //Ajout des outils au viewport
                 toolGroup.addViewport(viewPID, renderID);
+                toolGroup.addViewport(viewPID2, renderID);
+                toolGroup.addViewport(viewPID3, renderID);
                 console.log(toolGroup);
 
                 // Tools
@@ -162,7 +223,7 @@ export default ({ view, renderID, viewPID }) => {
                     bindings: [{ mouseButton: csEnums.MouseBindings.Secondary }],
                 });
                 //The crosshairtool is set to active when the user clicks on the CrossHair button which is the component CoordsOnCursor
-                renderingEngine.renderViewports([viewPID]);
+                renderingEngine.renderViewports([viewPID, viewPID2, viewPID3]);
             }
 
         }
@@ -178,6 +239,8 @@ export default ({ view, renderID, viewPID }) => {
                 <div id='content'>
                     <div id='DivView' style={{ display: 'flex', flexDirection: 'row' }}>
                         <div id={view} style={{ width: '409px', height: '500px' }}></div>
+                        <div id={view2} style={{ width: '409px', height: '500px' }}></div>
+                        <div id={view3} style={{ width: '409px', height: '500px' }}></div>
                     </div>
                 </div>
             </div>
