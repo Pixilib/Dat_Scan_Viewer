@@ -13,6 +13,52 @@ import GaeloCrosshair from './tools/gaeloCrosshair';
 
 
 export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, toolGroupId }) => {
+
+
+    const viewportColors = {
+        [viewPID]: 'rgb(200, 0, 0)',
+        [viewPID2]: 'rgb(200, 200, 0)',
+        [viewPID3]: 'rgb(0, 200, 0)',
+    };
+
+    const viewportReferenceLineControllable = [
+        viewPID,
+        viewPID2,
+        viewPID3,
+    ];
+
+    const viewportReferenceLineDraggableRotatable = [
+        viewPID,
+        viewPID2,
+        viewPID3,
+    ];
+
+    const viewportReferenceLineSlabThicknessControlsOn = [
+        viewPID,
+        viewPID2,
+        viewPID3,
+    ];
+
+    function getReferenceLineColor(viewportId) {
+        return viewportColors[viewportId];
+    };
+
+    function getReferenceLineControllable(viewportId) {
+        const index = viewportReferenceLineControllable.indexOf(viewportId);
+        return index !== -1;
+    };
+
+    function getReferenceLineDraggableRotatable(viewportId) {
+        const index = viewportReferenceLineDraggableRotatable.indexOf(viewportId);
+        return index !== -1;
+    };
+
+    function getReferenceLineSlabThicknessControlsOn(viewportId) {
+        const index =
+            viewportReferenceLineSlabThicknessControlsOn.indexOf(viewportId);
+        return index !== -1;
+    };
+
     const [files, setFiles] = useState([]);
     let volumeId = 'cornerStreamingImageVolume: myVolume';
 
@@ -112,12 +158,22 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
                 // Tools
                 toolGroup.addTool(ZoomTool.toolName)
                 toolGroup.addTool(StackScrollMouseWheelTool.toolName);
+                // toolGroup.addTool(CrosshairsTool.toolName, {
+                //     getReferenceLineColor,
+                //     getReferenceLineControllable,
+                //     getReferenceLineDraggableRotatable,
+                //     getReferenceLineSlabThicknessControlsOn,
+                // });
 
                 //De base sur la molette
                 toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
                 toolGroup.setToolActive(ZoomTool.toolName, {
                     bindings: [{ mouseButton: csEnums.MouseBindings.Secondary }],
                 });
+                // toolGroup.setToolEnabled(CrosshairsTool.toolName);
+                // toolGroup.setToolActive(CrosshairsTool.toolName, {
+                //     bindings: [{ mouseButton: csEnums.MouseBindings.Primary }],
+                // });
 
                 renderingEngine.renderViewports([viewPID, viewPID2, viewPID3]);
             } else {
@@ -216,12 +272,23 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
                 // Tools
                 toolGroup.addTool(ZoomTool.toolName)
                 toolGroup.addTool(StackScrollMouseWheelTool.toolName);
+                // toolGroup.addTool(CrosshairsTool.toolName, {
+                //     getReferenceLineColor,
+                //     getReferenceLineControllable,
+                //     getReferenceLineDraggableRotatable,
+                //     getReferenceLineSlabThicknessControlsOn,
+                // });
 
                 //De base sur la molette
                 toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
                 toolGroup.setToolActive(ZoomTool.toolName, {
                     bindings: [{ mouseButton: csEnums.MouseBindings.Secondary }],
                 });
+
+                // toolGroup.setToolEnabled(CrosshairsTool.toolName);
+                // toolGroup.setToolActive(CrosshairsTool.toolName, {
+                //     bindings: [{ mouseButton: csEnums.MouseBindings.Primary }],
+                // });
                 //The crosshairtool is set to active when the user clicks on the CrossHair button which is the component CoordsOnCursor
                 renderingEngine.renderViewports([viewPID, viewPID2, viewPID3]);
             }

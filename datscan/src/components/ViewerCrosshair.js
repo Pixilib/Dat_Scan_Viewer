@@ -201,6 +201,94 @@ export default () => {
             }
         })
 
+        const viewportColors = {
+            [viewPID1]: 'rgb(200, 0, 0)',
+            [viewPID12]: 'rgb(200, 200, 0)',
+            [viewPID13]: 'rgb(0, 200, 0)',
+        };
+
+        const viewportReferenceLineControllable = [
+            viewPID1,
+            viewPID12,
+            viewPID13,
+        ];
+
+        const viewportReferenceLineDraggableRotatable = [
+            viewPID1,
+            viewPID12,
+            viewPID13,
+        ];
+
+        const viewportReferenceLineSlabThicknessControlsOn = [
+            viewPID1,
+            viewPID12,
+            viewPID13,
+        ];
+
+        function getReferenceLineColor(viewportId) {
+            return viewportColors[viewportId];
+        };
+
+        function getReferenceLineControllable(viewportId) {
+            const index = viewportReferenceLineControllable.indexOf(viewportId);
+            return index !== -1;
+        };
+
+        function getReferenceLineDraggableRotatable(viewportId) {
+            const index = viewportReferenceLineDraggableRotatable.indexOf(viewportId);
+            return index !== -1;
+        };
+
+        function getReferenceLineSlabThicknessControlsOn(viewportId) {
+            const index =
+                viewportReferenceLineSlabThicknessControlsOn.indexOf(viewportId);
+            return index !== -1;
+        };
+
+        const viewportColors2 = {
+            [viewPID2]: 'rgb(200, 0, 0)',
+            [viewPID22]: 'rgb(200, 200, 0)',
+            [viewPID23]: 'rgb(0, 200, 0)',
+        };
+
+        const viewportReferenceLineControllable2 = [
+            viewPID2,
+            viewPID22,
+            viewPID23,
+        ];
+
+        const viewportReferenceLineDraggableRotatable2 = [
+            viewPID2,
+            viewPID22,
+            viewPID23,
+        ];
+
+        const viewportReferenceLineSlabThicknessControlsOn2 = [
+            viewPID2,
+            viewPID22,
+            viewPID23,
+        ];
+
+        function getReferenceLineColor2(viewportId) {
+            return viewportColors2[viewportId];
+        };
+
+        function getReferenceLineControllable2(viewportId) {
+            const index = viewportReferenceLineControllable2.indexOf(viewportId);
+            return index !== -1;
+        };
+
+        function getReferenceLineDraggableRotatable2(viewportId) {
+            const index = viewportReferenceLineDraggableRotatable2.indexOf(viewportId);
+            return index !== -1;
+        };
+
+        function getReferenceLineSlabThicknessControlsOn2(viewportId) {
+            const index =
+                viewportReferenceLineSlabThicknessControlsOn2.indexOf(viewportId);
+            return index !== -1;
+        };
+
         const toolGroup1 = ToolGroupManager.getToolGroup(toolGID1);
         console.log(toolGroup1);
 
@@ -216,16 +304,16 @@ export default () => {
             bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
         });
 
-        console.log(toolGroup1.getToolInstance(CrosshairsTool.toolName));
+        // console.log(toolGroup1.getToolInstance(CrosshairsTool.toolName));
 
         // const toolGroup2 = ToolGroupManager.getToolGroup(toolGID2);
         // console.log(toolGroup2);
 
         // toolGroup2.addTool(CrosshairsTool.toolName, {
-        //     getReferenceLineColor,
-        //     getReferenceLineControllable,
-        //     getReferenceLineDraggableRotatable,
-        //     getReferenceLineSlabThicknessControlsOn,
+        //     getReferenceLineColor2,
+        //     getReferenceLineControllable2,
+        //     getReferenceLineDraggableRotatable2,
+        //     getReferenceLineSlabThicknessControlsOn2,
         // });
 
         // toolGroup2.setToolEnabled(CrosshairsTool.toolName);
@@ -236,50 +324,6 @@ export default () => {
         // console.log(toolGroup2.getToolInstance(CrosshairsTool.toolName));
 
     }
-
-    const viewportColors = {
-        [viewPID1]: 'rgb(200, 0, 0)',
-        [viewPID12]: 'rgb(200, 200, 0)',
-        [viewPID13]: 'rgb(0, 200, 200)',
-    };
-
-    const viewportReferenceLineControllable = [
-        viewPID1,
-        viewPID12,
-        viewPID13,
-    ];
-
-    const viewportReferenceLineDraggableRotatable = [
-        viewPID1,
-        viewPID12,
-        viewPID13,
-    ];
-
-    const viewportReferenceLineSlabThicknessControlsOn = [
-        viewPID1,
-        viewPID12,
-        viewPID13,
-    ];
-
-    function getReferenceLineColor(viewportId) {
-        return viewportColors[viewportId];
-    };
-
-    function getReferenceLineControllable(viewportId) {
-        const index = viewportReferenceLineControllable.indexOf(viewportId);
-        return index !== -1;
-    };
-
-    function getReferenceLineDraggableRotatable(viewportId) {
-        const index = viewportReferenceLineDraggableRotatable.indexOf(viewportId);
-        return index !== -1;
-    };
-
-    function getReferenceLineSlabThicknessControlsOn(viewportId) {
-        const index =
-            viewportReferenceLineSlabThicknessControlsOn.indexOf(viewportId);
-        return index !== -1;
-    };
 
     return (
         <>
@@ -307,8 +351,8 @@ export default () => {
                 </div>
             </div>
             <div id="viewers" style={{ flexDirection: 'column', display: 'flex' }}>
-                <ViewerVolumeRoot view={viewID1} renderID={renderID1} viewPID={viewPID1} toolGroupId={toolGID1} view2={viewID12} view3={viewID13} viewPID2={viewPID12} viewPID3={viewID13}></ViewerVolumeRoot>
-                <ViewerVolumeRoot view={viewID2} renderID={renderID2} viewPID={viewPID2} toolGroupId={toolGID2} view2={viewID22} view3={viewID23} viewPID2={viewPID22} viewPID3={viewID23}></ViewerVolumeRoot>
+                <ViewerVolumeRoot view={viewID1} renderID={renderID1} viewPID={viewPID1} toolGroupId={toolGID1} view2={viewID12} view3={viewID13} viewPID2={viewPID12} viewPID3={viewPID13}></ViewerVolumeRoot>
+                <ViewerVolumeRoot view={viewID2} renderID={renderID2} viewPID={viewPID2} toolGroupId={toolGID2} view2={viewID22} view3={viewID23} viewPID2={viewPID22} viewPID3={viewPID23}></ViewerVolumeRoot>
             </div>
         </>
 
