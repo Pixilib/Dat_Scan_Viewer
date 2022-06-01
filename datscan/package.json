@@ -6,7 +6,7 @@
     "@cornerstonejs/core": "^0.4.5",
     "@cornerstonejs/streaming-image-volume-loader": "^0.2.13",
     "@cornerstonejs/tools": "^0.7.9",
-    "@kitware/vtk.js": "^24.5.2",
+    "@kitware/vtk.js": "^24.14.3",
     "@testing-library/jest-dom": "^5.16.3",
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",

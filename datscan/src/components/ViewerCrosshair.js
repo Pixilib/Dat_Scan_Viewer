@@ -63,6 +63,11 @@ export default () => {
         let worldRefPos1;
         let worldRefPos2;
         const offset = [];
+        const outOfBoundRB = viewp1.canvasToWorld([409, 500]);
+        console.log('out of bound right bottom', outOfBoundRB);
+
+        const outOfBoundLT = viewp1.canvasToWorld([0, 0]);
+        console.log('out of bound left top', outOfBoundLT);
 
         elementView1.addEventListener('click', (evt) => {
             if (firstClick === false) {
@@ -163,19 +168,24 @@ export default () => {
                 const canvasPos1 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
                 const worldPos1 = viewp1.canvasToWorld(canvasPos1);
 
-                elementCanvas1.innerHTML = 'Canvas : ' + canvasPos1[0] + ' , ' + canvasPos1[1];
-                coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
-                coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
-                coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
-
                 const worldPos2 = [worldPos1[0] + offset[0], worldPos1[1] + offset[1], worldPos1[2] + offset[2]];
                 const canvasPos2 = viewp1.worldToCanvas(worldPos1);
 
-                elementCanvas2.innerHTML = 'Canvas : ' + Math.trunc(canvasPos2[0]) + ' , ' + Math.trunc(canvasPos2[1]);
-                coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
-                coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
-                coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
+                if (worldPos2[0] > outOfBoundRB[0] || worldPos2[1] > outOfBoundRB[1] || worldPos2[0] < outOfBoundLT[0] || worldPos2[1] < outOfBoundLT[1]) {
+                    coordWorld2x.innerHTML = 'Out';
+                    coordWorld2y.innerHTML = 'Out';
+                    coordWorld2z.innerHTML = 'Out';
+                } else {
+                    elementCanvas1.innerHTML = 'Canvas : ' + canvasPos1[0] + ' , ' + canvasPos1[1];
+                    coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
+                    coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
+                    coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
 
+                    elementCanvas2.innerHTML = 'Canvas : ' + Math.trunc(canvasPos2[0]) + ' , ' + Math.trunc(canvasPos2[1]);
+                    coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
+                    coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
+                    coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
+                }
             }
         })
 
@@ -186,18 +196,24 @@ export default () => {
                 const canvasPos2 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
                 const worldPos2 = viewp2.canvasToWorld(canvasPos2);
 
-                elementCanvas2.innerHTML = 'Canvas : ' + canvasPos2[0] + ' , ' + canvasPos2[1];
-                coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
-                coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
-                coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
-
                 const worldPos1 = [worldPos2[0] - offset[0], worldPos2[1] - offset[1], worldPos2[2] - offset[2]];
                 const canvasPos1 = viewp1.worldToCanvas(worldPos1);
 
-                elementCanvas1.innerHTML = 'Canvas : ' + Math.trunc(canvasPos1[0]) + ' , ' + Math.trunc(canvasPos1[1]);
-                coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
-                coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
-                coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
+                if (worldPos1[0] > outOfBoundRB[0] || worldPos1[1] > outOfBoundRB[1] || worldPos1[0] < outOfBoundLT[0] || worldPos1[1] < outOfBoundLT[1]) {
+                    coordWorld1x.innerHTML = 'Out';
+                    coordWorld1y.innerHTML = 'Out';
+                    coordWorld1z.innerHTML = 'Out';
+                } else {
+                    elementCanvas2.innerHTML = 'Canvas : ' + canvasPos2[0] + ' , ' + canvasPos2[1];
+                    coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
+                    coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
+                    coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
+
+                    elementCanvas1.innerHTML = 'Canvas : ' + Math.trunc(canvasPos1[0]) + ' , ' + Math.trunc(canvasPos1[1]);
+                    coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
+                    coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
+                    coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
+                }
             }
         })
 
@@ -306,20 +322,20 @@ export default () => {
 
         // console.log(toolGroup1.getToolInstance(CrosshairsTool.toolName));
 
-        // const toolGroup2 = ToolGroupManager.getToolGroup(toolGID2);
-        // console.log(toolGroup2);
+        const toolGroup2 = ToolGroupManager.getToolGroup(toolGID2);
+        console.log(toolGroup2);
 
-        // toolGroup2.addTool(CrosshairsTool.toolName, {
-        //     getReferenceLineColor2,
-        //     getReferenceLineControllable2,
-        //     getReferenceLineDraggableRotatable2,
-        //     getReferenceLineSlabThicknessControlsOn2,
-        // });
+        toolGroup2.addTool(CrosshairsTool.toolName, {
+            getReferenceLineColor2,
+            getReferenceLineControllable2,
+            getReferenceLineDraggableRotatable2,
+            getReferenceLineSlabThicknessControlsOn2,
+        });
 
-        // toolGroup2.setToolEnabled(CrosshairsTool.toolName);
-        // toolGroup2.setToolActive(CrosshairsTool.toolName, {
-        //     bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
-        // });
+        toolGroup2.setToolEnabled(CrosshairsTool.toolName);
+        toolGroup2.setToolActive(CrosshairsTool.toolName, {
+            bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
+        });
 
         // console.log(toolGroup2.getToolInstance(CrosshairsTool.toolName));
 
