@@ -1,4 +1,4 @@
-import { cache, getRenderingEngine } from '@cornerstonejs/core';
+import { cache, getRenderingEngine, RenderingEngine } from '@cornerstonejs/core';
 import { toLowHighRange } from '@cornerstonejs/core/dist/esm/utilities/windowLevel';
 import { addTool, LengthTool, CrosshairsTool, ToolGroupManager, SegmentationDisplayTool, Enums, StackScrollMouseWheelTool, ZoomTool, init as ToolInit, BrushTool, RectangleScissorsTool, CircleScissorsTool, SphereScissorsTool, Enums as csEnums, utilities as CsToolsUtils, RectangleROIThresholdTool, segmentation, EllipticalROITool } from '@cornerstonejs/tools';
 import { useEffect } from 'react';
@@ -24,7 +24,6 @@ export default () => {
     const viewPID23 = 'Viewport23';
     const toolGID2 = 'ToolGroupID2'
 
-
     cache.setMaxCacheSize(2147483648);
 
     const getCoord = () => {
@@ -45,9 +44,10 @@ export default () => {
         const coordWorld2z = document.getElementById('worldC2_z');
         const sync2 = document.getElementById('sync2');
 
-
         const renderingEngine1 = getRenderingEngine(renderID1);
         const renderingEngine2 = getRenderingEngine(renderID2);
+
+        console.log(renderingEngine1, renderingEngine2);
         const viewp1 = renderingEngine1.getViewport(viewPID1);
         const viewp2 = renderingEngine2.getViewport(viewPID2);
 
@@ -320,22 +320,23 @@ export default () => {
             bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
         });
 
-        // console.log(toolGroup1.getToolInstance(CrosshairsTool.toolName));
+        // // console.log(toolGroup1.getToolInstance(CrosshairsTool.toolName));
+        // setTimeout(() => {
+        //     const toolGroup2 = ToolGroupManager.getToolGroup(toolGID2);
+        //     console.log(toolGroup2);
 
-        const toolGroup2 = ToolGroupManager.getToolGroup(toolGID2);
-        console.log(toolGroup2);
+        //     toolGroup2.addTool(CrosshairsTool.toolName, {
+        //         getReferenceLineColor2,
+        //         getReferenceLineControllable2,
+        //         getReferenceLineDraggableRotatable2,
+        //         getReferenceLineSlabThicknessControlsOn2,
+        //     });
 
-        toolGroup2.addTool(CrosshairsTool.toolName, {
-            getReferenceLineColor2,
-            getReferenceLineControllable2,
-            getReferenceLineDraggableRotatable2,
-            getReferenceLineSlabThicknessControlsOn2,
-        });
-
-        toolGroup2.setToolEnabled(CrosshairsTool.toolName);
-        toolGroup2.setToolActive(CrosshairsTool.toolName, {
-            bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
-        });
+        //     toolGroup2.setToolEnabled(CrosshairsTool.toolName);
+        //     toolGroup2.setToolActive(CrosshairsTool.toolName, {
+        //         bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
+        //     });
+        // }, 1000);
 
         // console.log(toolGroup2.getToolInstance(CrosshairsTool.toolName));
 
