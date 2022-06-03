@@ -43,6 +43,7 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
         return viewportColors[viewportId];
     };
 
+    console.log('pas ici');
     function getReferenceLineControllable(viewportId) {
         const index = viewportReferenceLineControllable.indexOf(viewportId);
         return index !== -1;
