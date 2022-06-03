@@ -1,78 +1,94 @@
-import React, { Component, useEffect, useState } from 'react';
-import { CONSTANTS, cache, init, RenderingEngine, volumeLoader, Enums, metaData, setVolumesForViewports, getRenderingEngine, VolumeViewport, utilities as csCoreUti } from '@cornerstonejs/core';
+import React, { useEffect, useState } from 'react';
+import { CONSTANTS, cache, init, RenderingEngine, volumeLoader, Enums, setVolumesForViewports } from '@cornerstonejs/core';
 import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import initCornerstoneWADOImageLoader from './initCornerstoneWADOImageLoader'
 import { cornerstoneStreamingImageVolumeLoader } from '@cornerstonejs/streaming-image-volume-loader';
 import { makeVolumeMetadata } from '@cornerstonejs/streaming-image-volume-loader/dist/esm/helpers';
-import { addTool, LengthTool, CrosshairsTool, ToolGroupManager, SegmentationDisplayTool, StackScrollMouseWheelTool, ZoomTool, init as ToolInit, BrushTool, RectangleScissorsTool, CircleScissorsTool, SphereScissorsTool, Enums as csEnums, utilities as CsToolsUtils, RectangleROIThresholdTool, segmentation, EllipticalROITool } from '@cornerstonejs/tools';
-import CoordsOnCursor from './tools/coordsOnCursor';
+import { addTool, CrosshairsTool, ToolGroupManager, StackScrollMouseWheelTool, ZoomTool, init as ToolInit, Enums as csEnums } from '@cornerstonejs/tools';
 import Drop from './DropZone';
-import RectangleRoiTreshold from './tools/rectangleRoiTreshold';
-import ListOrientation from './tools/ListOrientation';
-import GaeloCrosshair from './tools/gaeloCrosshair';
 
 
 export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, toolGroupId }) => {
 
-
-    const viewportColors = {
-        [viewPID]: 'rgb(200, 0, 0)',
-        [viewPID2]: 'rgb(200, 200, 0)',
-        [viewPID3]: 'rgb(0, 200, 0)',
-    };
-
-    const viewportReferenceLineControllable = [
-        viewPID,
-        viewPID2,
-        viewPID3,
-    ];
-
-    const viewportReferenceLineDraggableRotatable = [
-        viewPID,
-        viewPID2,
-        viewPID3,
-    ];
-
-    const viewportReferenceLineSlabThicknessControlsOn = [
-        viewPID,
-        viewPID2,
-        viewPID3,
-    ];
-
-    function getReferenceLineColor(viewportId) {
-        return viewportColors[viewportId];
-    };
-
-    console.log('pas ici');
-    function getReferenceLineControllable(viewportId) {
-        const index = viewportReferenceLineControllable.indexOf(viewportId);
-        return index !== -1;
-    };
-
-    function getReferenceLineDraggableRotatable(viewportId) {
-        const index = viewportReferenceLineDraggableRotatable.indexOf(viewportId);
-        return index !== -1;
-    };
-
-    function getReferenceLineSlabThicknessControlsOn(viewportId) {
-        const index =
-            viewportReferenceLineSlabThicknessControlsOn.indexOf(viewportId);
-        return index !== -1;
-    };
-
     const [files, setFiles] = useState([]);
     let volumeId = 'cornerStreamingImageVolume: myVolume';
+    const viewPIDS = [viewPID, viewPID2, viewPID3];
+    const views = [view, view2, view3];
 
     const buildImageId = (files) => {
         setFiles(files)
 
     }
 
+    const createAndAddTool = (toolGID, viewPIDS, renderID) => {
+
+        //Définition du groupe qui va contenir tout les outils
+        const toolGroup = ToolGroupManager.createToolGroup(toolGID);
+
+        for (let viewPID of viewPIDS) {
+            //Ajout des outils au viewport 
+            toolGroup.addViewport(viewPID, renderID);
+        }
+        // Tools
+        toolGroup.addTool(ZoomTool.toolName)
+        toolGroup.addTool(StackScrollMouseWheelTool.toolName);
+
+        //De base sur la molette
+        toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
+        toolGroup.setToolActive(ZoomTool.toolName, {
+            bindings: [{ mouseButton: csEnums.MouseBindings.Secondary }],
+        });
+    }
+
+    const createViewportRow = (views, viewPIDs) => {
+        const element1 = document.getElementById(views[0]);
+        element1.oncontextmenu = (e) => e.preventDefault();
+
+        const element2 = document.getElementById(views[1]);
+        element2.oncontextmenu = (e) => e.preventDefault();
+
+        const element3 = document.getElementById(views[2]);
+        element3.oncontextmenu = (e) => e.preventDefault();
+
+        const viewportInput = [{
+            viewportId: viewPIDs[0],
+            element: element1,
+            type: Enums.ViewportType.ORTHOGRAPHIC,
+            defaultOptions: {
+                orientation: CONSTANTS.ORIENTATION.AXIAL,
+                background: [0, 0, 0],
+            },
+        },
+        {
+            viewportId: viewPIDs[1],
+            element: element2,
+            type: Enums.ViewportType.ORTHOGRAPHIC,
+            defaultOptions: {
+                orientation: CONSTANTS.ORIENTATION.SAGITTAL,
+                background: [0, 0, 0],
+            },
+        },
+        {
+            viewportId: viewPIDs[2],
+            element: element3,
+            type: Enums.ViewportType.ORTHOGRAPHIC,
+            defaultOptions: {
+                orientation: CONSTANTS.ORIENTATION.CORONAL,
+                background: [0, 0, 0],
+            },
+        }];
+
+        return (viewportInput);
+
+    }
+
     useEffect(() => {
 
         const run = async () => {
+            //We verify if the first row of viewports has been created
             if (ToolGroupManager.getToolGroup('ToolGroupID1') != null) {
 
+                //Loading the images from the dropbox
                 let imageIds = []
                 files.forEach(file => {
                     let imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
@@ -85,15 +101,6 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
                 }
 
                 const volumeMetadata = makeVolumeMetadata(imageIds);
-
-                const element1 = document.getElementById(view);
-                element1.oncontextmenu = (e) => e.preventDefault();
-
-                const element2 = document.getElementById(view2);
-                element2.oncontextmenu = (e) => e.preventDefault();
-
-                const element3 = document.getElementById(view3);
-                element3.oncontextmenu = (e) => e.preventDefault();
 
                 volumeId = 'cornerStreamingImageVolume: myVolumetwo';
 
@@ -103,39 +110,11 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
 
                 const renderingEngine = new RenderingEngine(renderID);
 
-                const viewportInput = [{
-                    viewportId: viewPID,
-                    element: element1,
-                    type: Enums.ViewportType.ORTHOGRAPHIC,
-                    defaultOptions: {
-                        orientation: CONSTANTS.ORIENTATION.AXIAL,
-                        background: [0, 0, 0],
-                    },
-                },
-                {
-                    viewportId: viewPID2,
-                    element: element2,
-                    type: Enums.ViewportType.ORTHOGRAPHIC,
-                    defaultOptions: {
-                        orientation: CONSTANTS.ORIENTATION.SAGITTAL,
-                        background: [0, 0, 0],
-                    },
-                },
-                {
-                    viewportId: viewPID3,
-                    element: element3,
-                    type: Enums.ViewportType.ORTHOGRAPHIC,
-                    defaultOptions: {
-                        orientation: CONSTANTS.ORIENTATION.CORONAL,
-                        background: [0, 0, 0],
-                    },
-                }];
+                const viewportInput = createViewportRow(views, viewPIDS);
 
                 renderingEngine.setViewports(viewportInput);
 
                 volume.load();
-
-                console.log(cache);
 
                 await setVolumesForViewports(renderingEngine, [
                     {
@@ -144,51 +123,28 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
                         blendMode: Enums.BlendModes.MAXIMUM_INTENSITY_BLEND
                     },
                 ],
-                    [viewPID, viewPID2, viewPID3]
+                    viewPIDS
                 );
 
-                //Définition du groupe qui va contenir tout les outils
-                const toolGroup = ToolGroupManager.createToolGroup(toolGroupId);
+                //Creating the toolgroup and add the zoom / stackscroll
+                createAndAddTool(toolGroupId, viewPIDS, renderID);
 
-                //Ajout des outils au viewport 
-                toolGroup.addViewport(viewPID, renderID);
-                toolGroup.addViewport(viewPID2, renderID);
-                toolGroup.addViewport(viewPID3, renderID);
-                console.log(toolGroup);
+                renderingEngine.renderViewports(viewPIDS);
 
-                // Tools
-                toolGroup.addTool(ZoomTool.toolName)
-                toolGroup.addTool(StackScrollMouseWheelTool.toolName);
-                // toolGroup.addTool(CrosshairsTool.toolName, {
-                //     getReferenceLineColor,
-                //     getReferenceLineControllable,
-                //     getReferenceLineDraggableRotatable,
-                //     getReferenceLineSlabThicknessControlsOn,
-                // });
-
-                //De base sur la molette
-                toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
-                toolGroup.setToolActive(ZoomTool.toolName, {
-                    bindings: [{ mouseButton: csEnums.MouseBindings.Secondary }],
-                });
-                // toolGroup.setToolEnabled(CrosshairsTool.toolName);
-                // toolGroup.setToolActive(CrosshairsTool.toolName, {
-                //     bindings: [{ mouseButton: csEnums.MouseBindings.Primary }],
-                // });
-
-                renderingEngine.renderViewports([viewPID, viewPID2, viewPID3]);
             } else {
-                //Configuration et initialisation des libraries
+                //Initialisation of libraries
                 initCornerstoneWADOImageLoader();
                 await init();
                 await ToolInit();
 
-                //On ajoute les outils souhaités
+                //Adding tools to the library
                 addTool(ZoomTool);
                 addTool(StackScrollMouseWheelTool);
                 addTool(CrosshairsTool);
 
                 volumeLoader.registerVolumeLoader('cornerStreamingImageVolume', cornerstoneStreamingImageVolumeLoader);
+
+                //Loading the images from the dropbox
                 let imageIds = []
                 files.forEach(file => {
                     let imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
@@ -202,15 +158,6 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
 
                 const volumeMetadata = makeVolumeMetadata(imageIds);
 
-                const element1 = document.getElementById(view);
-                element1.oncontextmenu = (e) => e.preventDefault();
-
-                const element2 = document.getElementById(view2);
-                element2.oncontextmenu = (e) => e.preventDefault();
-
-                const element3 = document.getElementById(view3);
-                element3.oncontextmenu = (e) => e.preventDefault();
-
                 const volume = await volumeLoader.createAndCacheVolume(volumeId, {
                     imageIds
                 });
@@ -219,33 +166,7 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
 
                 const renderingEngine = new RenderingEngine(renderID);
 
-                const viewportInput = [{
-                    viewportId: viewPID,
-                    element: element1,
-                    type: Enums.ViewportType.ORTHOGRAPHIC,
-                    defaultOptions: {
-                        orientation: CONSTANTS.ORIENTATION.AXIAL,
-                        background: [0, 0, 0],
-                    },
-                },
-                {
-                    viewportId: viewPID2,
-                    element: element2,
-                    type: Enums.ViewportType.ORTHOGRAPHIC,
-                    defaultOptions: {
-                        orientation: CONSTANTS.ORIENTATION.SAGITTAL,
-                        background: [0, 0, 0],
-                    },
-                },
-                {
-                    viewportId: viewPID3,
-                    element: element3,
-                    type: Enums.ViewportType.ORTHOGRAPHIC,
-                    defaultOptions: {
-                        orientation: CONSTANTS.ORIENTATION.CORONAL,
-                        background: [0, 0, 0],
-                    },
-                }];
+                const viewportInput = createViewportRow(views, viewPIDS);
 
                 renderingEngine.setViewports(viewportInput);
 
@@ -258,40 +179,13 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
                         blendMode: Enums.BlendModes.MAXIMUM_INTENSITY_BLEND
                     },
                 ],
-                    [viewPID, viewPID2, viewPID3]
+                    viewPIDS
                 );
 
-                //Définition du groupe qui va contenir tout les outils
-                const toolGroup = ToolGroupManager.createToolGroup(toolGroupId);
+                //Creating the toolgroup and add the zoom / stackscroll
+                createAndAddTool(toolGroupId, viewPIDS, renderID);
 
-                //Ajout des outils au viewport
-                toolGroup.addViewport(viewPID, renderID);
-                toolGroup.addViewport(viewPID2, renderID);
-                toolGroup.addViewport(viewPID3, renderID);
-                console.log(toolGroup);
-
-                // Tools
-                toolGroup.addTool(ZoomTool.toolName)
-                toolGroup.addTool(StackScrollMouseWheelTool.toolName);
-                // toolGroup.addTool(CrosshairsTool.toolName, {
-                //     getReferenceLineColor,
-                //     getReferenceLineControllable,
-                //     getReferenceLineDraggableRotatable,
-                //     getReferenceLineSlabThicknessControlsOn,
-                // });
-
-                //De base sur la molette
-                toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
-                toolGroup.setToolActive(ZoomTool.toolName, {
-                    bindings: [{ mouseButton: csEnums.MouseBindings.Secondary }],
-                });
-
-                // toolGroup.setToolEnabled(CrosshairsTool.toolName);
-                // toolGroup.setToolActive(CrosshairsTool.toolName, {
-                //     bindings: [{ mouseButton: csEnums.MouseBindings.Primary }],
-                // });
-                //The crosshairtool is set to active when the user clicks on the CrossHair button which is the component CoordsOnCursor
-                renderingEngine.renderViewports([viewPID, viewPID2, viewPID3]);
+                renderingEngine.renderViewports(viewPIDS);
             }
 
         }

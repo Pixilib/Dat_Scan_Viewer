@@ -1,4 +1,3 @@
-import ViewerRoot from './components/ViewerRoot';
 import ViewerVolumeRoot from './components/ViewerVolumeRoot';
 import ViewerCrosshair from './components/ViewerCrosshair';
 
