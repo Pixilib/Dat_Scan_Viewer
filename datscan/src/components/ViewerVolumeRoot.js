@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CONSTANTS, cache, init, RenderingEngine, volumeLoader, Enums, setVolumesForViewports } from '@cornerstonejs/core';
+import { CONSTANTS, cache, init, RenderingEngine, volumeLoader, Enums, setVolumesForViewports, getRenderingEngine } from '@cornerstonejs/core';
 import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import initCornerstoneWADOImageLoader from './initCornerstoneWADOImageLoader'
 import { cornerstoneStreamingImageVolumeLoader } from '@cornerstonejs/streaming-image-volume-loader';
@@ -88,6 +88,7 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
             //We verify if the first row of viewports has been created
             if (ToolGroupManager.getToolGroup('ToolGroupID1') != null) {
 
+                const viewportIDs = ['Viewport1', 'Viewport12', 'Viewport13']
                 //Loading the images from the dropbox
                 let imageIds = []
                 files.forEach(file => {
@@ -108,7 +109,7 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
                     imageIds
                 });
 
-                const renderingEngine = new RenderingEngine(renderID);
+                const renderingEngine = getRenderingEngine(renderID);
 
                 const viewportInput = createViewportRow(views, viewPIDS);
 
@@ -129,7 +130,7 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
                 //Creating the toolgroup and add the zoom / stackscroll
                 createAndAddTool(toolGroupId, viewPIDS, renderID);
 
-                renderingEngine.renderViewports(viewPIDS);
+                renderingEngine.renderViewports(viewportIDs);
 
             } else {
                 //Initialisation of libraries
