@@ -112,7 +112,6 @@ export default () => {
                 const canvasPos1 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
                 const worldPos1 = viewp1.canvasToWorld(canvasPos1);
 
-                elementCanvas1.innerHTML = 'Canvas : ' + canvasPos1[0] + ' , ' + canvasPos1[1];
                 coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
                 coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
                 coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
@@ -120,7 +119,6 @@ export default () => {
                 const worldPos2 = [worldPos1[0] + offset[0], worldPos1[1] + offset[1], parseInt(coordWorld2z.innerHTML)];
                 const canvasPos2 = viewp1.worldToCanvas(worldPos1);
 
-                elementCanvas2.innerHTML = 'Canvas : ' + Math.trunc(canvasPos2[0]) + ' , ' + Math.trunc(canvasPos2[1]);
                 coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
                 coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
                 coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
@@ -139,7 +137,6 @@ export default () => {
                 const canvasPos2 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
                 const worldPos2 = viewp2.canvasToWorld(canvasPos2);
 
-                elementCanvas2.innerHTML = 'Canvas : ' + canvasPos2[0] + ' , ' + canvasPos2[1];
                 coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
                 coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
                 coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
@@ -147,7 +144,6 @@ export default () => {
                 const worldPos1 = [parseInt(coordWorld1x.innerHTML), worldPos2[1] - offset[1], worldPos2[2] - offset[2]];
                 const canvasPos1 = viewp1.worldToCanvas(worldPos1);
 
-                elementCanvas1.innerHTML = 'Canvas : ' + Math.trunc(canvasPos1[0]) + ' , ' + Math.trunc(canvasPos1[1]);
                 coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
                 coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
                 coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
@@ -176,12 +172,10 @@ export default () => {
                     coordWorld2y.innerHTML = 'Out';
                     coordWorld2z.innerHTML = 'Out';
                 } else {
-                    elementCanvas1.innerHTML = 'Canvas : ' + canvasPos1[0] + ' , ' + canvasPos1[1];
                     coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
                     coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
                     coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
 
-                    elementCanvas2.innerHTML = 'Canvas : ' + Math.trunc(canvasPos2[0]) + ' , ' + Math.trunc(canvasPos2[1]);
                     coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
                     coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
                     coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
@@ -204,12 +198,10 @@ export default () => {
                     coordWorld1y.innerHTML = 'Out';
                     coordWorld1z.innerHTML = 'Out';
                 } else {
-                    elementCanvas2.innerHTML = 'Canvas : ' + canvasPos2[0] + ' , ' + canvasPos2[1];
                     coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
                     coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
                     coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
 
-                    elementCanvas1.innerHTML = 'Canvas : ' + Math.trunc(canvasPos1[0]) + ' , ' + Math.trunc(canvasPos1[1]);
                     coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
                     coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
                     coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
@@ -305,38 +297,38 @@ export default () => {
             return index !== -1;
         };
 
-        const toolGroup1 = ToolGroupManager.getToolGroup(toolGID1);
-        console.log(toolGroup1);
+        // const toolGroup1 = ToolGroupManager.getToolGroup(toolGID1);
+        // console.log(toolGroup1);
 
-        toolGroup1.addTool(CrosshairsTool.toolName, {
-            getReferenceLineColor,
-            getReferenceLineControllable,
-            getReferenceLineDraggableRotatable,
-            getReferenceLineSlabThicknessControlsOn,
-        });
+        // toolGroup1.addTool(CrosshairsTool.toolName, {
+        //     getReferenceLineColor,
+        //     getReferenceLineControllable,
+        //     getReferenceLineDraggableRotatable,
+        //     getReferenceLineSlabThicknessControlsOn,
+        // });
 
-        toolGroup1.setToolEnabled(CrosshairsTool.toolName);
-        toolGroup1.setToolActive(CrosshairsTool.toolName, {
-            bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
-        });
+        // toolGroup1.setToolEnabled(CrosshairsTool.toolName);
+        // toolGroup1.setToolActive(CrosshairsTool.toolName, {
+        //     bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
+        // });
 
         // // console.log(toolGroup1.getToolInstance(CrosshairsTool.toolName));
-        // setTimeout(() => {
-        //     const toolGroup2 = ToolGroupManager.getToolGroup(toolGID2);
-        //     console.log(toolGroup2);
+        setTimeout(() => {
+            const toolGroup2 = ToolGroupManager.getToolGroup(toolGID2);
+            console.log(toolGroup2);
 
-        //     toolGroup2.addTool(CrosshairsTool.toolName, {
-        //         getReferenceLineColor2,
-        //         getReferenceLineControllable2,
-        //         getReferenceLineDraggableRotatable2,
-        //         getReferenceLineSlabThicknessControlsOn2,
-        //     });
+            toolGroup2.addTool(CrosshairsTool.toolName, {
+                getReferenceLineColor2,
+                getReferenceLineControllable2,
+                getReferenceLineDraggableRotatable2,
+                getReferenceLineSlabThicknessControlsOn2,
+            });
 
-        //     toolGroup2.setToolEnabled(CrosshairsTool.toolName);
-        //     toolGroup2.setToolActive(CrosshairsTool.toolName, {
-        //         bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
-        //     });
-        // }, 1000);
+            toolGroup2.setToolEnabled(CrosshairsTool.toolName);
+            toolGroup2.setToolActive(CrosshairsTool.toolName, {
+                bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
+            });
+        }, 1000);
 
         // console.log(toolGroup2.getToolInstance(CrosshairsTool.toolName));
 
@@ -350,7 +342,6 @@ export default () => {
                 <div style={{ display: 'flex' }}>
                     <div style={{ display: 'flex', color: 'white', marginRight: '30px', borderWidth: 2, borderColor: 'red', borderStyle: 'solid' }}>
                         <p id='sync1' style={{ marginRight: '10px' }}>Not synchronized </p>
-                        <p id='canvasC1' style={{ marginRight: '10px' }}>Canvas : </p>
                         <p id='worldC1' style={{ marginRight: '5px' }}>World  : </p>
                         <p id='worldC1_x' style={{ marginRight: '10px' }}></p>
                         <p id='worldC1_y' style={{ marginRight: '10px' }}></p>
@@ -359,7 +350,6 @@ export default () => {
 
                     <div style={{ display: 'flex', color: 'white', marginRight: '30px', borderWidth: 2, borderColor: 'yellow', borderStyle: 'solid' }}>
                         <p id='sync2' style={{ marginRight: '10px' }}>Not synchronized </p>
-                        <p id='canvasC2' style={{ color: 'white', marginRight: '10px' }}>Canvas : </p>
                         <p id='worldC2' style={{ color: 'white', marginRight: '5px' }}>World  : </p>
                         <p id='worldC2_x' style={{ marginRight: '10px' }}></p>
                         <p id='worldC2_y' style={{ marginRight: '10px' }}></p>
