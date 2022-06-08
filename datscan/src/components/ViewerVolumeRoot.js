@@ -8,15 +8,21 @@ import { addTool, CrosshairsTool, ToolGroupManager, StackScrollMouseWheelTool, Z
 import Drop from './DropZone';
 
 
-export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, toolGroupId }) => {
+export default ({ renderID, toolGroupId }) => {
 
     const [files, setFiles] = useState([]);
+    const [files2, setFiles2] = useState([]);
     let volumeId = 'cornerStreamingImageVolume: myVolume';
-    const viewPIDS = [viewPID, viewPID2, viewPID3];
-    const views = [view, view2, view3];
+    const viewPIDS = ['Viewport1', 'Viewport12', 'Viewport13', 'Viewport2', 'Viewport22', 'Viewport23'];
+    const views = ['view1', 'view12', 'view13', 'view2', 'view22', 'view23'];
 
     const buildImageId = (files) => {
         setFiles(files)
+
+    }
+
+    const buildImageId2 = (files) => {
+        setFiles2(files)
 
     }
 
@@ -50,6 +56,15 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
         const element3 = document.getElementById(views[2]);
         element3.oncontextmenu = (e) => e.preventDefault();
 
+        const element21 = document.getElementById(views[3]);
+        element1.oncontextmenu = (e) => e.preventDefault();
+
+        const element22 = document.getElementById(views[4]);
+        element2.oncontextmenu = (e) => e.preventDefault();
+
+        const element23 = document.getElementById(views[5]);
+        element3.oncontextmenu = (e) => e.preventDefault();
+
         const viewportInput = [{
             viewportId: viewPIDs[0],
             element: element1,
@@ -76,6 +91,32 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
                 orientation: CONSTANTS.ORIENTATION.CORONAL,
                 background: [0, 0, 0],
             },
+        }, {
+            viewportId: viewPIDs[3],
+            element: element21,
+            type: Enums.ViewportType.ORTHOGRAPHIC,
+            defaultOptions: {
+                orientation: CONSTANTS.ORIENTATION.AXIAL,
+                background: [0, 0, 0],
+            },
+        },
+        {
+            viewportId: viewPIDs[4],
+            element: element22,
+            type: Enums.ViewportType.ORTHOGRAPHIC,
+            defaultOptions: {
+                orientation: CONSTANTS.ORIENTATION.SAGITTAL,
+                background: [0, 0, 0],
+            },
+        },
+        {
+            viewportId: viewPIDs[5],
+            element: element23,
+            type: Enums.ViewportType.ORTHOGRAPHIC,
+            defaultOptions: {
+                orientation: CONSTANTS.ORIENTATION.CORONAL,
+                background: [0, 0, 0],
+            },
         }];
 
         return (viewportInput);
@@ -88,7 +129,7 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
             //We verify if the first row of viewports has been created
             if (ToolGroupManager.getToolGroup('ToolGroupID1') != null) {
 
-                const viewportIDs = ['Viewport1', 'Viewport12', 'Viewport13']
+                const viewportIDs = ['Viewport2', 'Viewport22', 'Viewport23']
                 //Loading the images from the dropbox
                 let imageIds = []
                 files.forEach(file => {
@@ -111,10 +152,6 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
 
                 const renderingEngine = getRenderingEngine(renderID);
 
-                const viewportInput = createViewportRow(views, viewPIDS);
-
-                renderingEngine.setViewports(viewportInput);
-
                 volume.load();
 
                 await setVolumesForViewports(renderingEngine, [
@@ -124,13 +161,13 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
                         blendMode: Enums.BlendModes.MAXIMUM_INTENSITY_BLEND
                     },
                 ],
-                    viewPIDS
+                    viewportIDs
                 );
 
                 //Creating the toolgroup and add the zoom / stackscroll
-                createAndAddTool(toolGroupId, viewPIDS, renderID);
+                createAndAddTool('ToolGroupID2', viewportIDs, renderID);
 
-                renderingEngine.renderViewports(viewportIDs);
+                renderingEngine.renderViewports(viewPIDS);
 
             } else {
                 //Initialisation of libraries
@@ -142,6 +179,8 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
                 addTool(ZoomTool);
                 addTool(StackScrollMouseWheelTool);
                 addTool(CrosshairsTool);
+
+                const viewportIDs = ['Viewport1', 'Viewport12', 'Viewport13']
 
                 volumeLoader.registerVolumeLoader('cornerStreamingImageVolume', cornerstoneStreamingImageVolumeLoader);
 
@@ -163,7 +202,6 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
                     imageIds
                 });
 
-                console.log(volume)
 
                 const renderingEngine = new RenderingEngine(renderID);
 
@@ -180,11 +218,11 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
                         blendMode: Enums.BlendModes.MAXIMUM_INTENSITY_BLEND
                     },
                 ],
-                    viewPIDS
+                    viewportIDs
                 );
 
                 //Creating the toolgroup and add the zoom / stackscroll
-                createAndAddTool(toolGroupId, viewPIDS, renderID);
+                createAndAddTool(toolGroupId, viewportIDs, renderID);
 
                 renderingEngine.renderViewports(viewPIDS);
             }
@@ -201,9 +239,17 @@ export default ({ view, view2, view3, renderID, viewPID, viewPID2, viewPID3, too
                 <Drop set={buildImageId}></Drop>
                 <div id='content'>
                     <div id='DivView' style={{ display: 'flex', flexDirection: 'row' }}>
-                        <div id={view} style={{ width: '409px', height: '500px' }}></div>
-                        <div id={view2} style={{ width: '409px', height: '500px' }}></div>
-                        <div id={view3} style={{ width: '409px', height: '500px' }}></div>
+                        <div id='view1' style={{ width: '409px', height: '500px' }}></div>
+                        <div id='view12' style={{ width: '409px', height: '500px' }}></div>
+                        <div id='view13' style={{ width: '409px', height: '500px' }}></div>
+                    </div>
+                </div>
+
+                <div id='content'>
+                    <div id='DivView2' style={{ display: 'flex', flexDirection: 'row' }}>
+                        <div id='view2' style={{ width: '409px', height: '500px' }}></div>
+                        <div id='view22' style={{ width: '409px', height: '500px' }}></div>
+                        <div id='view23' style={{ width: '409px', height: '500px' }}></div>
                     </div>
                 </div>
             </div>

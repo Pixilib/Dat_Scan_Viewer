@@ -165,8 +165,7 @@ export default () => {
             <h1>Volume viewports with 2 crosshair</h1>
             <button id="crosshair-button" onClick={getCoord}>CrossHair</button>
             <div id="viewers" style={{ flexDirection: 'column', display: 'flex' }}>
-                <ViewerVolumeRoot view={viewID1} renderID={renderID1} viewPID={viewPID1} toolGroupId={toolGID1} view2={viewID12} view3={viewID13} viewPID2={viewPID12} viewPID3={viewPID13}></ViewerVolumeRoot>
-                <ViewerVolumeRoot view={viewID2} renderID={renderID1} viewPID={viewPID2} toolGroupId={toolGID2} view2={viewID22} view3={viewID23} viewPID2={viewPID22} viewPID3={viewPID23}></ViewerVolumeRoot>
+                <ViewerVolumeRoot renderID={renderID1} toolGroupId={toolGID1}></ViewerVolumeRoot>
             </div>
         </>
 
