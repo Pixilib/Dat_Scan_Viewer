@@ -194,6 +194,7 @@ export default ({ renderID, toolGroupId }) => {
                 for (let imageId of imageIds) {
                     const firstImage = cornerstoneWADOImageLoader.wadouri.loadImage(imageId)
                     const fImage = await firstImage["promise"]
+                    console.log(fImage);
                 }
 
                 const volumeMetadata = makeVolumeMetadata(imageIds);
