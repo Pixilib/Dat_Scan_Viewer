@@ -1,5 +1,6 @@
-import { cache, getRenderingEngine } from '@cornerstonejs/core';
-import { CrosshairsTool, ToolGroupManager, Enums } from '@cornerstonejs/tools';
+import { cache, getEnabledElement, getRenderingEngine, RenderingEngine } from '@cornerstonejs/core';
+import { CrosshairsTool, ToolGroupManager, Enums, utilities as CsUtils } from '@cornerstonejs/tools';
+import jumpToWorld from '@cornerstonejs/tools/dist/esm/utilities/viewport/jumpToWorld.js'
 
 import ViewerVolumeRoot from "./ViewerVolumeRoot"
 
@@ -157,6 +158,14 @@ export default () => {
         toolGroup2.setToolActive(CrosshairsTool.toolName, {
             bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
         });
+
+        // console.log(toolGroup2.getToolInstance(CrosshairsTool.toolName));
+        // const element21 = getEnabledElement(document.getElementById('view2'));
+        // toolGroup2.getToolInstance(CrosshairsTool.toolName)._jump(element21, [200, 300, -700]);
+
+        const re = getRenderingEngine(renderID1);
+        const viewport = re.getViewport('Viewport2');
+        jumpToWorld(viewport, [200, 300, -700]);
 
     }
 
