@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { CONSTANTS, cache, init, RenderingEngine, volumeLoader, Enums, setVolumesForViewports, getRenderingEngine } from '@cornerstonejs/core';
+import { CONSTANTS, init, RenderingEngine, volumeLoader, Enums, setVolumesForViewports, getRenderingEngine } from '@cornerstonejs/core';
 import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import initCornerstoneWADOImageLoader from './initCornerstoneWADOImageLoader'
 import { cornerstoneStreamingImageVolumeLoader } from '@cornerstonejs/streaming-image-volume-loader';
-import { makeVolumeMetadata } from '@cornerstonejs/streaming-image-volume-loader/dist/esm/helpers';
 import { addTool, CrosshairsTool, ToolGroupManager, StackScrollMouseWheelTool, ZoomTool, init as ToolInit, Enums as csEnums } from '@cornerstonejs/tools';
 import Drop from './DropZone';
+import { getGPUTier } from 'detect-gpu'
 
 
 export default ({ renderID, toolGroupId }) => {
+
+
 
     const [files, setFiles] = useState([]);
     const [files2, setFiles2] = useState([]);
@@ -126,6 +128,10 @@ export default ({ renderID, toolGroupId }) => {
     useEffect(() => {
 
         const run = async () => {
+
+            console.log('test')
+
+            console.log(await getGPUTier())
             //We verify if the first row of viewports has been created
             if (ToolGroupManager.getToolGroup('ToolGroupID1') != null) {
 
@@ -141,8 +147,6 @@ export default ({ renderID, toolGroupId }) => {
                     const firstImage = cornerstoneWADOImageLoader.wadouri.loadImage(imageId)
                     const fImage = await firstImage["promise"]
                 }
-
-                const volumeMetadata = makeVolumeMetadata(imageIds);
 
                 volumeId = 'cornerStreamingImageVolume: myVolumetwo';
 
@@ -194,10 +198,9 @@ export default ({ renderID, toolGroupId }) => {
                 for (let imageId of imageIds) {
                     const firstImage = cornerstoneWADOImageLoader.wadouri.loadImage(imageId)
                     const fImage = await firstImage["promise"]
-                    console.log(fImage);
                 }
 
-                const volumeMetadata = makeVolumeMetadata(imageIds);
+                // const volumeMetadata = makeVolumeMetadata(imageIds);
 
                 const volume = await volumeLoader.createAndCacheVolume(volumeId, {
                     imageIds

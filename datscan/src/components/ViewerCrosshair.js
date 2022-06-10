@@ -1,6 +1,6 @@
 import { cache, getEnabledElement, getRenderingEngine, RenderingEngine } from '@cornerstonejs/core';
 import { CrosshairsTool, ToolGroupManager, Enums, utilities as CsUtils } from '@cornerstonejs/tools';
-import jumpToWorld from '@cornerstonejs/tools/dist/esm/utilities/viewport/jumpToWorld.js'
+import jumpToWorld from '@cornerstonejs/tools/dist/esm/utilities/viewport/jumpToWorld';
 
 import ViewerVolumeRoot from "./ViewerVolumeRoot"
 
@@ -49,6 +49,7 @@ export default () => {
         const renderingEngine1 = getRenderingEngine(renderID1);
 
         const viewp1 = renderingEngine1.getViewport(viewPID1);
+        console.log(viewp1.getCamera());
         const viewp2 = renderingEngine1.getViewport(viewPID2);
 
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -256,6 +257,30 @@ export default () => {
                     coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
                     instanceTG1._jump(element1, worldPos1);
                 }
+            }
+        })
+
+        elementView1.addEventListener('wheel', (evt) => {
+            if (secondClick == true) {
+                const coordBase = parseInt(coordWorld1z.innerHTML);
+                const coordUpdate = viewp1.getCamera().focalPoint[2].toFixed(2);
+                const offset = coordBase - coordUpdate;
+                coordWorld1z.innerHTML = coordUpdate;
+                const worldPos2 = [parseInt(coordWorld2x.innerHTML), parseInt(coordWorld2y.innerHTML), parseInt(coordWorld2z.innerHTML) - offset]
+                coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
+                jumpToWorld(viewp2, worldPos2);
+            }
+        })
+
+        elementView2.addEventListener('wheel', (evt) => {
+            if (secondClick == true) {
+                const coordBase = parseInt(coordWorld2z.innerHTML);
+                const coordUpdate = viewp2.getCamera().focalPoint[2].toFixed(2);
+                const offset = coordBase - coordUpdate;
+                coordWorld2z.innerHTML = coordUpdate;
+                const worldPos1 = [parseInt(coordWorld1x.innerHTML), parseInt(coordWorld1y.innerHTML), parseInt(coordWorld1z.innerHTML) - offset]
+                coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
+                jumpToWorld(viewp1, worldPos1);
             }
         })
 
