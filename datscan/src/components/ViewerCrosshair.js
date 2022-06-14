@@ -1,4 +1,4 @@
-import { cache, getEnabledElement, getRenderingEngine, RenderingEngine } from '@cornerstonejs/core';
+import { cache, getEnabledElement, getRenderingEngine, RenderingEngine, Enums as CsEnums } from '@cornerstonejs/core';
 import { CrosshairsTool, ToolGroupManager, Enums, utilities as CsUtils } from '@cornerstonejs/tools';
 import jumpToWorld from '@cornerstonejs/tools/dist/esm/utilities/viewport/jumpToWorld';
 
@@ -32,7 +32,12 @@ export default () => {
         document.getElementById('CrossHairUI').style = "visibility: 'visible'";
         let viewPCenter = [];
         const elementView1 = document.getElementById(viewID1);
+        const elementView12 = document.getElementById(viewID12);
+        const elementView13 = document.getElementById(viewID13);
+
         const elementView2 = document.getElementById(viewID2);
+        const elementView22 = document.getElementById(viewID22);
+        const elementView23 = document.getElementById(viewID23);
 
         const elementCanvas1 = document.getElementById('canvasC1');
         const coordWorld1x = document.getElementById('worldC1_x');
@@ -283,6 +288,20 @@ export default () => {
                 jumpToWorld(viewp1, worldPos1);
             }
         })
+
+        const { CAMERA_MODIFIED } = CsEnums.Events;
+
+        elementView1.addEventListener(CAMERA_MODIFIED, (evt) => {
+            console.log('Cam 1 : ', evt.detail.camera.focalPoint);
+        })
+
+        elementView12.addEventListener(CAMERA_MODIFIED, (evt) => {
+            console.log('Cam 2 : ', evt.detail.camera.focalPoint);
+        })
+
+        // elementView13.addEventListener(CAMERA_MODIFIED, (evt) => {
+        //     console.log(evt);
+        // })
 
         //Functions for the crosshair of the 3 first viewports
         const viewportColors = {
