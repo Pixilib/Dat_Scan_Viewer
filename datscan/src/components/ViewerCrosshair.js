@@ -54,8 +54,12 @@ export default () => {
         const renderingEngine1 = getRenderingEngine(renderID1);
 
         const viewp1 = renderingEngine1.getViewport(viewPID1);
-        console.log(viewp1.getCamera());
+        const viewp12 = renderingEngine1.getViewport(viewPID12);
+        const viewp13 = renderingEngine1.getViewport(viewPID13);
+
         const viewp2 = renderingEngine1.getViewport(viewPID2);
+        const viewp22 = renderingEngine1.getViewport(viewPID22);
+        const viewp23 = renderingEngine1.getViewport(viewPID23);
 
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         //Here I add and activate boths crosshairs for the two rows of viewport but It wont work
@@ -156,147 +160,181 @@ export default () => {
             }
         })
 
-        elementView1.addEventListener('mousedown', (evt) => {
-            if (secondClick === true) {
-                const rect = elementView1.getBoundingClientRect();
+        // elementView1.addEventListener('mousedown', (evt) => {
+        //     if (secondClick === true) {
+        //         const rect = elementView1.getBoundingClientRect();
 
-                const canvasPos1 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
-                const worldPos1 = viewp1.canvasToWorld(canvasPos1);
+        //         const canvasPos1 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
+        //         const worldPos1 = viewp1.canvasToWorld(canvasPos1);
 
-                coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
-                coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
-                coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
+        //         coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
+        //         coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
+        //         coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
 
-                const worldPos2 = [worldPos1[0] + offset[0], worldPos1[1] + offset[1], parseInt(coordWorld2z.innerHTML)];
-                const canvasPos2 = viewp1.worldToCanvas(worldPos1);
+        //         const worldPos2 = [worldPos1[0] + offset[0], worldPos1[1] + offset[1], parseInt(coordWorld2z.innerHTML)];
+        //         const canvasPos2 = viewp1.worldToCanvas(worldPos1);
 
-                coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
-                coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
-                coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
-                instanceTG2._jump(element2, worldPos2);
+        //         coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
+        //         coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
+        //         coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
+        //         instanceTG2._jump(element2, worldPos2);
 
-                isClicked = true;
-            }
-        })
+        //         isClicked = true;
+        //     }
+        // })
 
-        elementView1.addEventListener('mouseup', () => {
-            isClicked = false;
-        })
+        // elementView1.addEventListener('mouseup', () => {
+        //     isClicked = false;
+        // })
 
-        elementView2.addEventListener('mousedown', (evt) => {
-            if (secondClick === true) {
-                const rect = elementView2.getBoundingClientRect();
+        // elementView2.addEventListener('mousedown', (evt) => {
+        //     if (secondClick === true) {
+        //         const rect = elementView2.getBoundingClientRect();
 
-                const canvasPos2 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
-                const worldPos2 = viewp2.canvasToWorld(canvasPos2);
+        //         const canvasPos2 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
+        //         const worldPos2 = viewp2.canvasToWorld(canvasPos2);
 
-                coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
-                coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
-                coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
+        //         coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
+        //         coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
+        //         coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
 
-                const worldPos1 = [worldPos2[0] - offset[0], worldPos2[1] - offset[1], worldPos2[2] - offset[2]];
-                const canvasPos1 = viewp1.worldToCanvas(worldPos1);
+        //         const worldPos1 = [worldPos2[0] - offset[0], worldPos2[1] - offset[1], worldPos2[2] - offset[2]];
+        //         const canvasPos1 = viewp1.worldToCanvas(worldPos1);
 
-                coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
-                coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
-                coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
-                instanceTG1._jump(element1, worldPos1);
+        //         coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
+        //         coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
+        //         coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
+        //         instanceTG1._jump(element1, worldPos1);
 
-                isClicked = true;
-            }
-        })
+        //         isClicked = true;
+        //     }
+        // })
 
-        elementView2.addEventListener('mouseup', () => {
-            isClicked = false;
-        })
+        // elementView2.addEventListener('mouseup', () => {
+        //     isClicked = false;
+        // })
 
 
-        elementView1.addEventListener('mousemove', (evt) => {
-            if (isClicked === true) {
-                const rect = elementView1.getBoundingClientRect();
+        // elementView1.addEventListener('mousemove', (evt) => {
+        //     if (isClicked === true) {
+        //         const rect = elementView1.getBoundingClientRect();
 
-                const canvasPos1 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
-                const worldPos1 = viewp1.canvasToWorld(canvasPos1);
+        //         const canvasPos1 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
+        //         const worldPos1 = viewp1.canvasToWorld(canvasPos1);
 
-                const worldPos2 = [worldPos1[0] + offset[0], worldPos1[1] + offset[1], worldPos1[2] + offset[2]];
-                const canvasPos2 = viewp1.worldToCanvas(worldPos1);
+        //         const worldPos2 = [worldPos1[0] + offset[0], worldPos1[1] + offset[1], worldPos1[2] + offset[2]];
+        //         const canvasPos2 = viewp1.worldToCanvas(worldPos1);
 
-                if (worldPos2[0] > outOfBoundRB[0] || worldPos2[1] > outOfBoundRB[1] || worldPos2[0] < outOfBoundLT[0] || worldPos2[1] < outOfBoundLT[1]) {
-                    coordWorld2x.innerHTML = 'Out';
-                    coordWorld2y.innerHTML = 'Out';
-                    coordWorld2z.innerHTML = 'Out';
-                } else {
-                    coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
-                    coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
-                    coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
+        //         if (worldPos2[0] > outOfBoundRB[0] || worldPos2[1] > outOfBoundRB[1] || worldPos2[0] < outOfBoundLT[0] || worldPos2[1] < outOfBoundLT[1]) {
+        //             coordWorld2x.innerHTML = 'Out';
+        //             coordWorld2y.innerHTML = 'Out';
+        //             coordWorld2z.innerHTML = 'Out';
+        //         } else {
+        //             coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
+        //             coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
+        //             coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
 
-                    coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
-                    coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
-                    coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
-                    instanceTG2._jump(element2, worldPos2);
-                }
-            }
-        })
+        //             coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
+        //             coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
+        //             coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
+        //             instanceTG2._jump(element2, worldPos2);
+        //         }
+        //     }
+        // })
 
-        elementView2.addEventListener('mousemove', (evt) => {
-            if (isClicked === true) {
-                const rect = elementView2.getBoundingClientRect();
+        // elementView2.addEventListener('mousemove', (evt) => {
+        //     if (isClicked === true) {
+        //         const rect = elementView2.getBoundingClientRect();
 
-                const canvasPos2 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
-                const worldPos2 = viewp2.canvasToWorld(canvasPos2);
+        //         const canvasPos2 = [Math.floor(evt.clientX - rect.left), Math.floor(evt.clientY - rect.top)];
+        //         const worldPos2 = viewp2.canvasToWorld(canvasPos2);
 
-                const worldPos1 = [worldPos2[0] - offset[0], worldPos2[1] - offset[1], worldPos2[2] - offset[2]];
-                const canvasPos1 = viewp1.worldToCanvas(worldPos1);
+        //         const worldPos1 = [worldPos2[0] - offset[0], worldPos2[1] - offset[1], worldPos2[2] - offset[2]];
+        //         const canvasPos1 = viewp1.worldToCanvas(worldPos1);
 
-                if (worldPos1[0] > outOfBoundRB[0] || worldPos1[1] > outOfBoundRB[1] || worldPos1[0] < outOfBoundLT[0] || worldPos1[1] < outOfBoundLT[1]) {
-                    coordWorld1x.innerHTML = 'Out';
-                    coordWorld1y.innerHTML = 'Out';
-                    coordWorld1z.innerHTML = 'Out';
-                } else {
-                    coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
-                    coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
-                    coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
+        //         if (worldPos1[0] > outOfBoundRB[0] || worldPos1[1] > outOfBoundRB[1] || worldPos1[0] < outOfBoundLT[0] || worldPos1[1] < outOfBoundLT[1]) {
+        //             coordWorld1x.innerHTML = 'Out';
+        //             coordWorld1y.innerHTML = 'Out';
+        //             coordWorld1z.innerHTML = 'Out';
+        //         } else {
+        //             coordWorld2x.innerHTML = worldPos2[0].toFixed(2) + ' , ';
+        //             coordWorld2y.innerHTML = worldPos2[1].toFixed(2) + ' , ';
+        //             coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
 
-                    coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
-                    coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
-                    coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
-                    instanceTG1._jump(element1, worldPos1);
-                }
-            }
-        })
+        //             coordWorld1x.innerHTML = worldPos1[0].toFixed(2) + ' , ';
+        //             coordWorld1y.innerHTML = worldPos1[1].toFixed(2) + ' , ';
+        //             coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
+        //             instanceTG1._jump(element1, worldPos1);
+        //         }
+        //     }
+        // })
 
-        elementView1.addEventListener('wheel', (evt) => {
-            if (secondClick == true) {
-                const coordBase = parseInt(coordWorld1z.innerHTML);
-                const coordUpdate = viewp1.getCamera().focalPoint[2].toFixed(2);
-                const offset = coordBase - coordUpdate;
-                coordWorld1z.innerHTML = coordUpdate;
-                const worldPos2 = [parseInt(coordWorld2x.innerHTML), parseInt(coordWorld2y.innerHTML), parseInt(coordWorld2z.innerHTML) - offset]
-                coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
-                jumpToWorld(viewp2, worldPos2);
-            }
-        })
+        // elementView1.addEventListener('wheel', (evt) => {
+        //     if (secondClick == true) {
+        //         const coordBase = parseInt(coordWorld1z.innerHTML);
+        //         const coordUpdate = viewp1.getCamera().focalPoint[2].toFixed(2);
+        //         const offset = coordBase - coordUpdate;
+        //         coordWorld1z.innerHTML = coordUpdate;
+        //         const worldPos2 = [parseInt(coordWorld2x.innerHTML), parseInt(coordWorld2y.innerHTML), parseInt(coordWorld2z.innerHTML) - offset]
+        //         coordWorld2z.innerHTML = worldPos2[2].toFixed(2);
+        //         jumpToWorld(viewp2, worldPos2);
+        //     }
+        // })
 
-        elementView2.addEventListener('wheel', (evt) => {
-            if (secondClick == true) {
-                const coordBase = parseInt(coordWorld2z.innerHTML);
-                const coordUpdate = viewp2.getCamera().focalPoint[2].toFixed(2);
-                const offset = coordBase - coordUpdate;
-                coordWorld2z.innerHTML = coordUpdate;
-                const worldPos1 = [parseInt(coordWorld1x.innerHTML), parseInt(coordWorld1y.innerHTML), parseInt(coordWorld1z.innerHTML) - offset]
-                coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
-                jumpToWorld(viewp1, worldPos1);
-            }
-        })
+        // elementView2.addEventListener('wheel', (evt) => {
+        //     if (secondClick == true) {
+        //         const coordBase = parseInt(coordWorld2z.innerHTML);
+        //         const coordUpdate = viewp2.getCamera().focalPoint[2].toFixed(2);
+        //         const offset = coordBase - coordUpdate;
+        //         coordWorld2z.innerHTML = coordUpdate;
+        //         const worldPos1 = [parseInt(coordWorld1x.innerHTML), parseInt(coordWorld1y.innerHTML), parseInt(coordWorld1z.innerHTML) - offset]
+        //         coordWorld1z.innerHTML = worldPos1[2].toFixed(2);
+        //         jumpToWorld(viewp1, worldPos1);
+        //     }
+        // })
 
         const { CAMERA_MODIFIED } = CsEnums.Events;
 
         elementView1.addEventListener(CAMERA_MODIFIED, (evt) => {
             console.log('Cam 1 : ', evt.detail.camera.focalPoint);
+            const cam = evt.detail.camera.focalPoint;
+            const coord = [cam[0] + offset[0], cam[1] + offset[1], cam[2] + offset[2]]
+            jumpToWorld(viewp2, coord);
         })
 
         elementView12.addEventListener(CAMERA_MODIFIED, (evt) => {
             console.log('Cam 2 : ', evt.detail.camera.focalPoint);
+            const cam = evt.detail.camera.focalPoint;
+            const coord = [cam[0] + offset[0], cam[1] + offset[1], cam[2] + offset[2]]
+            jumpToWorld(viewp22, coord);
+        })
+
+        elementView13.addEventListener(CAMERA_MODIFIED, (evt) => {
+            console.log('Cam 3 : ', evt.detail.camera.focalPoint);
+            const cam = evt.detail.camera.focalPoint;
+            const coord = [cam[0] + offset[0], cam[1] + offset[1], cam[2] + offset[2]]
+            jumpToWorld(viewp23, coord);
+        })
+
+        elementView2.addEventListener(CAMERA_MODIFIED, (evt) => {
+            console.log('Cam 1 : ', evt.detail.camera.focalPoint);
+            const cam = evt.detail.camera.focalPoint;
+            const coord = [cam[0] - offset[0], cam[1] - offset[1], cam[2] - offset[2]]
+            jumpToWorld(viewp1, coord);
+        })
+
+        elementView22.addEventListener(CAMERA_MODIFIED, (evt) => {
+            console.log('Cam 2 : ', evt.detail.camera.focalPoint);
+            const cam = evt.detail.camera.focalPoint;
+            const coord = [cam[0] - offset[0], cam[1] - offset[1], cam[2] - offset[2]]
+            jumpToWorld(viewp12, coord);
+        })
+
+        elementView23.addEventListener(CAMERA_MODIFIED, (evt) => {
+            console.log('Cam 3 : ', evt.detail.camera.focalPoint);
+            const cam = evt.detail.camera.focalPoint;
+            const coord = [cam[0] - offset[0], cam[1] - offset[1], cam[2] - offset[2]]
+            jumpToWorld(viewp13, coord);
         })
 
         // elementView13.addEventListener(CAMERA_MODIFIED, (evt) => {
