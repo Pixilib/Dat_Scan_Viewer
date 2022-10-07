@@ -53,6 +53,8 @@ export default () => {
 
         const renderingEngine1 = getRenderingEngine(renderID1);
 
+        console.log(renderingEngine1.getViewports());
+
         const viewp1 = renderingEngine1.getViewport(viewPID1);
         const viewp12 = renderingEngine1.getViewport(viewPID12);
         const viewp13 = renderingEngine1.getViewport(viewPID13);
